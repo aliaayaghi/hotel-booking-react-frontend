@@ -7,6 +7,7 @@ import RoleRoute from "../components/layout/RoleRoute.jsx";
 import AboutPage from "../pages/public/AboutPage.jsx";
 import HomePage from "../pages/public/HomePage.jsx";
 import NotFoundPage from "../pages/public/NotFoundPage.jsx";
+import SearchResultsPage from "../pages/public/SearchResultsPage.jsx";
 import { USER_ROLES } from "../utils/roleUtils.js";
 
 function PublicPlaceholderPage({ title, eyebrow }) {
@@ -48,6 +49,10 @@ export const router = createBrowserRouter([
       {
         path: "about",
         element: <AboutPage />,
+      },
+      {
+        path: "search",
+        element: <SearchResultsPage />,
       },
       {
         path: "login",
