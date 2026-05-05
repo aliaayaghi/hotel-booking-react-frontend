@@ -3,9 +3,11 @@ import { createBrowserRouter } from "react-router-dom";
 
 import DashboardLayout from "../components/layout/DashboardLayout.jsx";
 import PublicLayout from "../components/layout/PublicLayout.jsx";
+import RoleRoute from "../components/layout/RoleRoute.jsx";
 import AboutPage from "../pages/public/AboutPage.jsx";
 import HomePage from "../pages/public/HomePage.jsx";
 import NotFoundPage from "../pages/public/NotFoundPage.jsx";
+import { USER_ROLES } from "../utils/roleUtils.js";
 
 function PublicPlaceholderPage({ title, eyebrow }) {
   return (
@@ -63,25 +65,31 @@ export const router = createBrowserRouter([
       {
         path: "/customer",
         element: (
-          <DashboardPlaceholderPage
-            title="Customer Dashboard"
-            role="CUSTOMER"
-          />
+          <RoleRoute allowedRole={USER_ROLES.CUSTOMER}>
+            <DashboardPlaceholderPage
+              title="Customer Dashboard"
+              role="CUSTOMER"
+            />
+          </RoleRoute>
         ),
       },
       {
         path: "/manager",
         element: (
-          <DashboardPlaceholderPage
-            title="Manager Dashboard"
-            role="HOTEL_MANAGER"
-          />
+          <RoleRoute allowedRole={USER_ROLES.HOTEL_MANAGER}>
+            <DashboardPlaceholderPage
+              title="Manager Dashboard"
+              role="HOTEL_MANAGER"
+            />
+          </RoleRoute>
         ),
       },
       {
         path: "/admin",
         element: (
-          <DashboardPlaceholderPage title="Admin Dashboard" role="ADMIN" />
+          <RoleRoute allowedRole={USER_ROLES.ADMIN}>
+            <DashboardPlaceholderPage title="Admin Dashboard" role="ADMIN" />
+          </RoleRoute>
         ),
       },
     ],
