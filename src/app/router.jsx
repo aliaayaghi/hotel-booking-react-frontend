@@ -5,6 +5,7 @@ import DashboardLayout from "../components/layout/DashboardLayout.jsx";
 import PublicLayout from "../components/layout/PublicLayout.jsx";
 import RoleRoute from "../components/layout/RoleRoute.jsx";
 import AboutPage from "../pages/public/AboutPage.jsx";
+import HotelDetailsPage from "../pages/public/HotelDetailsPage.jsx";
 import HomePage from "../pages/public/HomePage.jsx";
 import NotFoundPage from "../pages/public/NotFoundPage.jsx";
 import SearchResultsPage from "../pages/public/SearchResultsPage.jsx";
@@ -53,6 +54,10 @@ export const router = createBrowserRouter([
       {
         path: "search",
         element: <SearchResultsPage />,
+      },
+      {
+        path: "hotels/:hotelId",
+        element: <HotelDetailsPage />,
       },
       {
         path: "login",

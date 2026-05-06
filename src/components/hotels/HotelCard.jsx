@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 function getHotelImage(hotel) {
   const firstPhoto = Array.isArray(hotel?.photos) ? hotel.photos[0] : null;
@@ -113,12 +114,19 @@ export default function HotelCard({ hotel }) {
   const reviewScore = hotel?.averageRating ?? hotel?.rating;
   const scoreLevel = getScoreLevel(reviewScore);
   const overview = hotel?.overview ?? hotel?.description;
+  const hotelId = hotel?.id;
+  const detailsPath = `/hotels/${encodeURIComponent(hotelId)}`;
+  const hotelName = hotel?.name ?? "Unnamed hotel";
 
   return (
-    <article className="hotel-card">
+    <Link
+      aria-label={`View details for ${hotelName}`}
+      className="hotel-card"
+      to={detailsPath}
+    >
       <div className="hotel-card__media">
         {image ? (
-          <img src={image} alt={hotel?.name ?? "Hotel"} />
+          <img src={image} alt={hotelName} />
         ) : (
           <div className="hotel-card__image-placeholder" aria-hidden="true">
             HB
@@ -129,7 +137,7 @@ export default function HotelCard({ hotel }) {
       <div className="hotel-card__body">
         <div className="hotel-card__heading">
           <div>
-            <h2>{hotel?.name ?? "Unnamed hotel"}</h2>
+            <h2>{hotelName}</h2>
             {type ? <p className="hotel-card__type">{type}</p> : null}
             <StarRating rating={rating} />
           </div>
@@ -155,7 +163,9 @@ export default function HotelCard({ hotel }) {
             <span className="hotel-card__price">Price needs backend verification</span>
           )}
         </div>
+
+        <span className="button button--primary">View details</span>
       </div>
-    </article>
+    </Link>
   );
 }
