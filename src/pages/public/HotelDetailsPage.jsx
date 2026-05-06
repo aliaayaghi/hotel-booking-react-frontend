@@ -7,9 +7,16 @@ import LoadingState from "../../components/feedback/LoadingState.jsx";
 import HotelActionHeader from "../../components/hotels/HotelActionHeader.jsx";
 import HotelDetailsTabs from "../../components/hotels/HotelDetailsTabs.jsx";
 import HotelGallery from "../../components/hotels/HotelGallery.jsx";
+import HotelOverviewSection from "../../components/hotels/HotelOverviewSection.jsx";
 import HotelSearchBar from "../../components/hotels/HotelSearchBar.jsx";
 import {
+  useHotelAccessibility,
+  useHotelAmenities,
+  useHotelAverageScores,
+  useHotelBreakfastPolicy,
   useHotelDetails,
+  useHotelNearbyPlaces,
+  useHotelPetsPolicy,
   useHotelPhotos,
 } from "../../features/hotels/hotelHooks.js";
 
@@ -61,6 +68,12 @@ export default function HotelDetailsPage() {
   const { hotelId } = useParams();
   const hotelDetails = useHotelDetails(hotelId);
   const hotelPhotos = useHotelPhotos(hotelId);
+  const hotelAmenities = useHotelAmenities(hotelId);
+  const hotelNearbyPlaces = useHotelNearbyPlaces(hotelId);
+  const hotelAccessibility = useHotelAccessibility(hotelId);
+  const hotelAverageScores = useHotelAverageScores(hotelId);
+  const hotelBreakfastPolicy = useHotelBreakfastPolicy(hotelId);
+  const hotelPetsPolicy = useHotelPetsPolicy(hotelId);
   const hotel = hotelDetails.data;
   const isNotFound =
     hotelDetails.error?.response?.status === 404 ||
@@ -68,7 +81,6 @@ export default function HotelDetailsPage() {
   const location = getHotelLocation(hotel);
   const starRating = getStarRating(hotel);
   const hotelType = hotel?.type ?? hotel?.hotelType;
-  const overview = hotel?.overview ?? hotel?.description;
 
   function handleSelectRoom() {
     document
@@ -140,27 +152,16 @@ export default function HotelDetailsPage() {
 
           <HotelDetailsTabs />
 
-          <section
-            className="hotel-details-section"
-            id="overview"
-            aria-labelledby="hotel-overview-title"
-          >
-            <p className="eyebrow">Overview</p>
-            <h2 id="hotel-overview-title">About this stay</h2>
-            <p>
-              {overview || "Overview needs backend verification"}
-            </p>
-          </section>
-
-          <section
-            className="hotel-details-section hotel-details-section--placeholder"
-            id="about"
-            aria-labelledby="hotel-about-title"
-          >
-            <p className="eyebrow">About</p>
-            <h2 id="hotel-about-title">Hotel information</h2>
-            <p>Detailed hotel information will be added in a future task.</p>
-          </section>
+          <HotelOverviewSection
+            accessibilityQuery={hotelAccessibility}
+            amenitiesQuery={hotelAmenities}
+            averageScoresQuery={hotelAverageScores}
+            breakfastPolicyQuery={hotelBreakfastPolicy}
+            hotel={hotel}
+            nearbyQuery={hotelNearbyPlaces}
+            petsPolicyQuery={hotelPetsPolicy}
+            starRating={starRating}
+          />
 
           <section
             className="hotel-details-section hotel-details-section--placeholder"
