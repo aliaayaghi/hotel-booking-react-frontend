@@ -802,6 +802,125 @@ a {
   font-weight: 700;
 }
 
+.hotel-details-page {
+  display: grid;
+  gap: 16px;
+  padding: 28px 0 56px;
+}
+
+.hotel-details-breadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: #6b7280;
+  font-size: 0.94rem;
+  font-weight: 700;
+}
+
+.hotel-details-breadcrumb a {
+  color: #1f2937;
+}
+
+.hotel-details-breadcrumb a:hover {
+  color: #8b7355;
+}
+
+.hotel-details-hero,
+.hotel-details-section {
+  border: 1px solid rgba(31, 41, 55, 0.1);
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 18px 50px rgba(31, 41, 55, 0.08);
+}
+
+.hotel-details-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 24px;
+  align-items: end;
+  padding: 34px;
+}
+
+.hotel-details-hero h1 {
+  max-width: 760px;
+  margin: 0;
+  color: #1f2937;
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  line-height: 1.05;
+}
+
+.hotel-details__meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+  color: #4b5563;
+  font-weight: 750;
+}
+
+.hotel-details__meta > span:not(:last-child)::after {
+  content: "";
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  margin-left: 10px;
+  border-radius: 999px;
+  background: rgba(139, 115, 85, 0.58);
+  vertical-align: middle;
+}
+
+.hotel-details__stars {
+  display: inline-flex;
+  gap: 2px;
+  color: #d7d0bf;
+  letter-spacing: 0;
+}
+
+.hotel-details__star--filled {
+  color: #c9a227;
+}
+
+.hotel-details__meta-note {
+  color: #8b7355;
+  font-size: 0.92rem;
+}
+
+.hotel-details__address {
+  max-width: 680px;
+  margin: 12px 0 0;
+  color: #4b5563;
+}
+
+.hotel-details-hero__action {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.hotel-details-section {
+  padding: 28px 34px;
+  scroll-margin-top: 96px;
+}
+
+.hotel-details-section h2 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 1.45rem;
+  line-height: 1.2;
+}
+
+.hotel-details-section p:not(.eyebrow) {
+  max-width: 780px;
+  margin: 12px 0 0;
+  color: #4b5563;
+}
+
+.hotel-details-section--placeholder {
+  border-style: dashed;
+  background: #fdfcf9;
+}
+
 @keyframes feedback-spin {
   to {
     transform: rotate(360deg);
@@ -881,5 +1000,18 @@ a {
   .hotel-search__guest-panel {
     left: 0;
     right: auto;
+  }
+
+  .hotel-details-hero {
+    grid-template-columns: 1fr;
+    padding: 28px;
+  }
+
+  .hotel-details-hero__action {
+    justify-content: flex-start;
+  }
+
+  .hotel-details-section {
+    padding: 26px 28px;
   }
 }
