@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 
 import EmptyState from "../../components/feedback/EmptyState.jsx";
 import ErrorState from "../../components/feedback/ErrorState.jsx";
@@ -9,12 +9,14 @@ import HotelDetailsTabs from "../../components/hotels/HotelDetailsTabs.jsx";
 import HotelGallery from "../../components/hotels/HotelGallery.jsx";
 import HotelOverviewSection from "../../components/hotels/HotelOverviewSection.jsx";
 import HotelSearchBar from "../../components/hotels/HotelSearchBar.jsx";
+import ChooseRoomSection from "../../components/rooms/ChooseRoomSection.jsx";
 import {
   useHotelAccessibility,
   useHotelAmenities,
   useHotelAverageScores,
   useHotelBreakfastPolicy,
   useHotelDetails,
+  useHotelRooms,
   useHotelNearbyPlaces,
   useHotelPetsPolicy,
   useHotelPhotos,
@@ -66,6 +68,7 @@ function StarRating({ rating }) {
 
 export default function HotelDetailsPage() {
   const { hotelId } = useParams();
+  const [searchParams] = useSearchParams();
   const hotelDetails = useHotelDetails(hotelId);
   const hotelPhotos = useHotelPhotos(hotelId);
   const hotelAmenities = useHotelAmenities(hotelId);
@@ -74,7 +77,15 @@ export default function HotelDetailsPage() {
   const hotelAverageScores = useHotelAverageScores(hotelId);
   const hotelBreakfastPolicy = useHotelBreakfastPolicy(hotelId);
   const hotelPetsPolicy = useHotelPetsPolicy(hotelId);
+  const hotelRooms = useHotelRooms(hotelId);
   const hotel = hotelDetails.data;
+  const roomSearchValues = {
+    adults: searchParams.get("adults") ?? "",
+    checkIn: searchParams.get("checkIn") ?? "",
+    checkOut: searchParams.get("checkOut") ?? "",
+    children: searchParams.get("children") ?? "",
+    rooms: searchParams.get("rooms") ?? "",
+  };
   const isNotFound =
     hotelDetails.error?.response?.status === 404 ||
     (hotelDetails.isSuccess && !hotel);
@@ -163,15 +174,10 @@ export default function HotelDetailsPage() {
             starRating={starRating}
           />
 
-          <section
-            className="hotel-details-section hotel-details-section--placeholder"
-            id="rooms"
-            aria-labelledby="hotel-rooms-title"
-          >
-            <p className="eyebrow">Rooms</p>
-            <h2 id="hotel-rooms-title">Select a room</h2>
-            <p>Rooms will be added in a future task.</p>
-          </section>
+          <ChooseRoomSection
+            roomsQuery={hotelRooms}
+            searchValues={roomSearchValues}
+          />
 
           <section
             className="hotel-details-section hotel-details-section--placeholder"
