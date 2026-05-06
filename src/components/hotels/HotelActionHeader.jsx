@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 
+import SaveButton from "../saved/SaveButton.jsx";
+
 function getCurrentPageUrl() {
   if (typeof window === "undefined") {
     return "";
@@ -8,7 +10,7 @@ function getCurrentPageUrl() {
   return window.location.href;
 }
 
-export default function HotelActionHeader({ onSelectRoom }) {
+export default function HotelActionHeader({ hotelId, onSelectRoom }) {
   const [shareLabel, setShareLabel] = useState("Share");
 
   async function handleShare() {
@@ -35,14 +37,7 @@ export default function HotelActionHeader({ onSelectRoom }) {
 
   return (
     <div className="hotel-action-header" aria-label="Hotel actions">
-      <button
-        aria-label="Save hotel"
-        className="hotel-action-header__button hotel-action-header__button--icon"
-        type="button"
-      >
-        <span aria-hidden="true">&#9825;</span>
-        <span>Save</span>
-      </button>
+      <SaveButton hotelId={hotelId} />
 
       <button
         className="hotel-action-header__button"

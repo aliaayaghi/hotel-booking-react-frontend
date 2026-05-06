@@ -184,7 +184,7 @@ export default function ChooseRoomSection({ hotelId, roomsQuery, searchValues })
       </div>
 
       {!datesSelected ? (
-        <p className="choose-room-section__availability-note">
+        <p className="choose-room-section__availability-note hotel-detail-inline-state">
           Choose dates to check availability.
         </p>
       ) : null}

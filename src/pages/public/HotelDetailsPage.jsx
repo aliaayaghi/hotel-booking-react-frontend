@@ -104,9 +104,13 @@ export default function HotelDetailsPage() {
   const hotelType = hotel?.type ?? hotel?.hotelType;
 
   function handleSelectRoom() {
-    document
-      .getElementById("rooms")
-      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const roomsSection = document.getElementById("rooms");
+
+    if (!roomsSection) {
+      return;
+    }
+
+    roomsSection.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   return (
@@ -163,7 +167,7 @@ export default function HotelDetailsPage() {
               )}
             </div>
 
-            <HotelActionHeader onSelectRoom={handleSelectRoom} />
+            <HotelActionHeader hotelId={hotelId} onSelectRoom={handleSelectRoom} />
           </section>
 
           <HotelGallery

@@ -48,3 +48,15 @@ export async function loadCurrentUser() {
 
   return data;
 }
+
+export async function updateProfile(profileData) {
+  const { data } = await axiosClient.patch("/api/auth/me", profileData);
+
+  return data;
+}
+
+export async function changePassword(passwordData) {
+  const { data } = await axiosClient.patch("/api/auth/me/password", passwordData);
+
+  return data;
+}

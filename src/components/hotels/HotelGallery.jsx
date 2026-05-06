@@ -141,7 +141,10 @@ export default function HotelGallery({ hotelName, photosQuery }) {
   }
 
   return (
-    <section className="hotel-gallery" aria-label={`${hotelName} photos`}>
+    <section
+      className={`hotel-gallery hotel-gallery--count-${visiblePhotos.length}`}
+      aria-label={`${hotelName} photos`}
+    >
       <div className="hotel-gallery__grid">
         {visiblePhotos.map((photo, index) => {
           const photoUrl = getPhotoUrl(photo);
