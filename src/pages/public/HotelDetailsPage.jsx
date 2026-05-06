@@ -84,6 +84,9 @@ export default function HotelDetailsPage() {
     checkIn: searchParams.get("checkIn") ?? "",
     checkOut: searchParams.get("checkOut") ?? "",
     children: searchParams.get("children") ?? "",
+    childrenAges: searchParams.get("childrenAges") ?? "",
+    city: searchParams.get("city") ?? "",
+    petsAllowed: searchParams.get("petsAllowed") === "true",
     rooms: searchParams.get("rooms") ?? "",
   };
   const isNotFound =
@@ -175,6 +178,7 @@ export default function HotelDetailsPage() {
           />
 
           <ChooseRoomSection
+            hotelId={hotelId}
             roomsQuery={hotelRooms}
             searchValues={roomSearchValues}
           />

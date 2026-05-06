@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 function getHotelImage(hotel) {
   const firstPhoto = Array.isArray(hotel?.photos) ? hotel.photos[0] : null;
@@ -105,6 +105,7 @@ function StarRating({ rating }) {
 }
 
 export default function HotelCard({ hotel }) {
+  const locationState = useLocation();
   const image = getHotelImage(hotel);
   const location = getHotelLocation(hotel);
   const startingPrice = getStartingPrice(hotel);
@@ -114,8 +115,8 @@ export default function HotelCard({ hotel }) {
   const reviewScore = hotel?.averageRating ?? hotel?.rating;
   const scoreLevel = getScoreLevel(reviewScore);
   const overview = hotel?.overview ?? hotel?.description;
-  const hotelId = hotel?.id;
-  const detailsPath = `/hotels/${encodeURIComponent(hotelId)}`;
+  const hotelId = hotel?.id ?? hotel?.hotelId;
+  const detailsPath = `/hotels/${encodeURIComponent(hotelId)}${locationState.search}`;
   const hotelName = hotel?.name ?? "Unnamed hotel";
 
   return (

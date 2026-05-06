@@ -1327,7 +1327,7 @@ a {
 
 .choose-room-search {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
   gap: 10px;
   padding: 10px;
   border: 1px solid rgba(31, 41, 55, 0.1);
@@ -1357,6 +1357,48 @@ a {
   overflow-wrap: anywhere;
   color: #1f2937;
   font-size: 0.98rem;
+}
+
+.choose-room-search__field input[type="date"],
+.choose-room-search__field input[type="number"],
+.choose-room-search__field input[type="text"] {
+  width: 100%;
+  min-height: 32px;
+  margin-top: 4px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #1f2937;
+  font-weight: 800;
+  outline: 0;
+}
+
+.choose-room-search__field--checkbox {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  column-gap: 10px;
+}
+
+.choose-room-search__field--checkbox span {
+  grid-column: 1 / -1;
+}
+
+.choose-room-search__field--checkbox input {
+  width: 18px;
+  height: 18px;
+  accent-color: #1f2937;
+}
+
+.choose-room-search__field--checkbox strong {
+  margin-top: 0;
+}
+
+.choose-room-section__availability-note {
+  margin: -4px 0 0;
+  color: #8b7355;
+  font-size: 0.94rem;
+  font-weight: 750;
 }
 
 .choose-room-list {
@@ -1495,6 +1537,45 @@ a {
   padding: 8px 0 8px 12px;
   color: #4b5563;
   font-size: 0.94rem;
+}
+
+.room-card__availability-row {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.room-card__availability {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  border: 1px solid rgba(31, 41, 55, 0.12);
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: #fdfcf9;
+  color: #4b5563;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.room-card__availability--available {
+  border-color: rgba(75, 117, 81, 0.28);
+  background: rgba(75, 117, 81, 0.09);
+  color: #2f5d37;
+}
+
+.room-card__availability--unavailable,
+.room-card__availability--error {
+  border-color: rgba(146, 64, 14, 0.22);
+  background: rgba(146, 64, 14, 0.08);
+  color: #7c2d12;
+}
+
+.room-card__availability--checking,
+.room-card__availability--needs-dates,
+.room-card__availability--unchecked {
+  border-color: rgba(139, 115, 85, 0.22);
+  background: rgba(248, 246, 241, 0.82);
+  color: #8b7355;
 }
 
 .room-card__actions {

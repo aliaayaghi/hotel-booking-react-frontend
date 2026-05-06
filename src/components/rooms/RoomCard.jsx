@@ -103,7 +103,26 @@ function RoomFact({ label, value }) {
   );
 }
 
-export default function RoomCard({ onMoreDetails, room }) {
+const availabilityLabels = {
+  available: "Available",
+  checking: "Checking availability",
+  error: "Error checking availability",
+  "needs-dates": "Needs dates",
+  unavailable: "Not available",
+  unchecked: "Check availability",
+};
+
+function getAvailabilityClassName(status) {
+  return `room-card__availability room-card__availability--${status}`;
+}
+
+export default function RoomCard({
+  availabilityStatus = "needs-dates",
+  isCheckingAvailability = false,
+  onCheckAvailability,
+  onMoreDetails,
+  room,
+}) {
   const image = getRoomImage(room);
   const roomName = getRoomName(room);
   const roomType = getRoomType(room);
@@ -116,6 +135,13 @@ export default function RoomCard({ onMoreDetails, room }) {
     adults !== undefined || children !== undefined
       ? `${adults ?? 0} adults${children !== undefined ? `, ${children} children` : ""}`
       : "";
+  const resolvedAvailabilityStatus = isCheckingAvailability
+    ? "checking"
+    : availabilityStatus;
+  const selectDisabled = resolvedAvailabilityStatus !== "available";
+  const checkDisabled =
+    resolvedAvailabilityStatus === "needs-dates" ||
+    resolvedAvailabilityStatus === "checking";
 
   return (
     <article className="room-card">
@@ -172,6 +198,13 @@ export default function RoomCard({ onMoreDetails, room }) {
           {cancellationPolicy || "Cancellation policy needs backend verification"}
         </div>
 
+        <div className="room-card__availability-row">
+          <span className={getAvailabilityClassName(resolvedAvailabilityStatus)}>
+            {availabilityLabels[resolvedAvailabilityStatus] ??
+              "Check availability"}
+          </span>
+        </div>
+
         <div className="room-card__actions">
           <button
             className="button button--secondary"
@@ -180,7 +213,24 @@ export default function RoomCard({ onMoreDetails, room }) {
           >
             More details
           </button>
-          <button className="button button--primary" type="button">
+          <button
+            className="button button--secondary"
+            disabled={checkDisabled}
+            type="button"
+            onClick={() => onCheckAvailability?.(room)}
+          >
+            Check availability
+          </button>
+          <button
+            className="button button--primary"
+            disabled={selectDisabled}
+            title={
+              selectDisabled
+                ? "Check availability before continuing."
+                : "Booking flow will be added in a future task."
+            }
+            type="button"
+          >
             Select and continue
           </button>
         </div>
