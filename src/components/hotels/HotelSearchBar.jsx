@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 const initialSearch = {
@@ -11,11 +11,8 @@ const initialSearch = {
   petsAllowed: false,
 };
 
-export default function HotelSearchBar() {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const [isGuestsOpen, setIsGuestsOpen] = useState(false);
-  const [search, setSearch] = useState(() => ({
+function getSearchFromParams(searchParams) {
+  return {
     ...initialSearch,
     city: searchParams.get("city") || initialSearch.city,
     checkIn: searchParams.get("checkIn") || initialSearch.checkIn,
@@ -24,7 +21,18 @@ export default function HotelSearchBar() {
     children: searchParams.get("children") || initialSearch.children,
     rooms: searchParams.get("rooms") || initialSearch.rooms,
     petsAllowed: searchParams.get("petsAllowed") === "true",
-  }));
+  };
+}
+
+export default function HotelSearchBar({ compact = false }) {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [isGuestsOpen, setIsGuestsOpen] = useState(false);
+  const [search, setSearch] = useState(() => getSearchFromParams(searchParams));
+
+  useEffect(() => {
+    setSearch(getSearchFromParams(searchParams));
+  }, [searchParams]);
 
   const guestSummary = useMemo(() => {
     const adultLabel = Number(search.adults) === 1 ? "adult" : "adults";
@@ -81,11 +89,15 @@ export default function HotelSearchBar() {
       }
     });
 
+    queryParams.set("page", "0");
     navigate(`/search?${queryParams.toString()}`);
   }
 
   return (
-    <form className="hotel-search" onSubmit={handleSubmit}>
+    <form
+      className={compact ? "hotel-search hotel-search--compact" : "hotel-search"}
+      onSubmit={handleSubmit}
+    >
       <div className="hotel-search__grid">
         <div className="hotel-search__box">
           <label htmlFor="hotel-search-city">City</label>

@@ -6,6 +6,7 @@ import ErrorState from "../../components/feedback/ErrorState.jsx";
 import LoadingState from "../../components/feedback/LoadingState.jsx";
 import FilterSidebar from "../../components/hotels/FilterSidebar.jsx";
 import HotelCard from "../../components/hotels/HotelCard.jsx";
+import HotelSearchBar from "../../components/hotels/HotelSearchBar.jsx";
 import { useHotelSearch } from "../../features/search/searchHooks.js";
 
 function getHotelsFromResponse(data) {
@@ -49,42 +50,15 @@ function getCurrentPage(searchParams, data) {
   return data?.number ?? data?.page ?? data?.data?.number ?? urlPage;
 }
 
-function SearchSummary({ searchParams, totalResults }) {
+function ResultCount({ searchParams, totalResults }) {
   const city = searchParams.get("city");
-  const checkIn = searchParams.get("checkIn");
-  const checkOut = searchParams.get("checkOut");
-  const adults = searchParams.get("adults");
-  const children = searchParams.get("children");
-  const rooms = searchParams.get("rooms");
+  const placeLabel = city ? city : "Search results";
+  const propertyLabel = Number(totalResults) === 1 ? "property" : "properties";
 
   return (
-    <div className="search-summary">
-      <div>
-        <p className="eyebrow">Search results</p>
-        <h1>{city ? `Hotels in ${city}` : "Hotel search"}</h1>
-      </div>
-      <dl className="search-summary__details">
-        <div>
-          <dt>Dates</dt>
-          <dd>{checkIn && checkOut ? `${checkIn} to ${checkOut}` : "Any dates"}</dd>
-        </div>
-        <div>
-          <dt>Guests</dt>
-          <dd>
-            {adults ?? "Any"} adults
-            {children ? `, ${children} children` : ""}
-          </dd>
-        </div>
-        <div>
-          <dt>Rooms</dt>
-          <dd>{rooms ?? "Any"}</dd>
-        </div>
-        <div>
-          <dt>Found</dt>
-          <dd>{totalResults}</dd>
-        </div>
-      </dl>
-    </div>
+    <p className="search-result-count">
+      {placeLabel}: {totalResults} {propertyLabel} found
+    </p>
   );
 }
 
@@ -134,7 +108,8 @@ export default function SearchResultsPage() {
 
   return (
     <main className="public-page search-page">
-      <SearchSummary searchParams={searchParams} totalResults={totalResults} />
+      <HotelSearchBar compact />
+      <ResultCount searchParams={searchParams} totalResults={totalResults} />
 
       <div className="search-page__layout">
         <FilterSidebar searchParams={searchParams} />
