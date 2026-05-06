@@ -4,22 +4,27 @@ import { Link, useParams, useSearchParams } from "react-router-dom";
 import EmptyState from "../../components/feedback/EmptyState.jsx";
 import ErrorState from "../../components/feedback/ErrorState.jsx";
 import LoadingState from "../../components/feedback/LoadingState.jsx";
+import AccessibilitySection from "../../components/hotels/AccessibilitySection.jsx";
 import HotelActionHeader from "../../components/hotels/HotelActionHeader.jsx";
 import HotelDetailsTabs from "../../components/hotels/HotelDetailsTabs.jsx";
 import HotelGallery from "../../components/hotels/HotelGallery.jsx";
 import HotelOverviewSection from "../../components/hotels/HotelOverviewSection.jsx";
 import HotelSearchBar from "../../components/hotels/HotelSearchBar.jsx";
+import PoliciesSection from "../../components/hotels/PoliciesSection.jsx";
+import ReviewsSection from "../../components/reviews/ReviewsSection.jsx";
 import ChooseRoomSection from "../../components/rooms/ChooseRoomSection.jsx";
 import {
   useHotelAccessibility,
   useHotelAmenities,
   useHotelAverageScores,
   useHotelBreakfastPolicy,
+  useHotelCheckinPolicy,
   useHotelDetails,
   useHotelRooms,
   useHotelNearbyPlaces,
   useHotelPetsPolicy,
   useHotelPhotos,
+  useHotelReviews,
 } from "../../features/hotels/hotelHooks.js";
 
 function getHotelLocation(hotel) {
@@ -76,7 +81,9 @@ export default function HotelDetailsPage() {
   const hotelAccessibility = useHotelAccessibility(hotelId);
   const hotelAverageScores = useHotelAverageScores(hotelId);
   const hotelBreakfastPolicy = useHotelBreakfastPolicy(hotelId);
+  const hotelCheckinPolicy = useHotelCheckinPolicy(hotelId);
   const hotelPetsPolicy = useHotelPetsPolicy(hotelId);
+  const hotelReviews = useHotelReviews(hotelId);
   const hotelRooms = useHotelRooms(hotelId);
   const hotel = hotelDetails.data;
   const roomSearchValues = {
@@ -183,35 +190,18 @@ export default function HotelDetailsPage() {
             searchValues={roomSearchValues}
           />
 
-          <section
-            className="hotel-details-section hotel-details-section--placeholder"
-            id="accessibility"
-            aria-labelledby="hotel-accessibility-title"
-          >
-            <p className="eyebrow">Accessibility</p>
-            <h2 id="hotel-accessibility-title">Accessibility details</h2>
-            <p>Accessibility details will be added in a future task.</p>
-          </section>
+          <AccessibilitySection accessibilityQuery={hotelAccessibility} />
 
-          <section
-            className="hotel-details-section hotel-details-section--placeholder"
-            id="policies"
-            aria-labelledby="hotel-policies-title"
-          >
-            <p className="eyebrow">Policies</p>
-            <h2 id="hotel-policies-title">Stay policies</h2>
-            <p>Policies will be added in a future task.</p>
-          </section>
+          <PoliciesSection
+            breakfastPolicyQuery={hotelBreakfastPolicy}
+            checkinPolicyQuery={hotelCheckinPolicy}
+            petsPolicyQuery={hotelPetsPolicy}
+          />
 
-          <section
-            className="hotel-details-section hotel-details-section--placeholder"
-            id="reviews"
-            aria-labelledby="hotel-reviews-title"
-          >
-            <p className="eyebrow">Reviews</p>
-            <h2 id="hotel-reviews-title">Guest reviews</h2>
-            <p>Reviews will be added in a future task.</p>
-          </section>
+          <ReviewsSection
+            averageScoresQuery={hotelAverageScores}
+            reviewsQuery={hotelReviews}
+          />
         </>
       ) : null}
     </main>
