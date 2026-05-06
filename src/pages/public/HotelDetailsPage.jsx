@@ -4,8 +4,12 @@ import { Link, useParams } from "react-router-dom";
 import EmptyState from "../../components/feedback/EmptyState.jsx";
 import ErrorState from "../../components/feedback/ErrorState.jsx";
 import LoadingState from "../../components/feedback/LoadingState.jsx";
+import HotelGallery from "../../components/hotels/HotelGallery.jsx";
 import HotelSearchBar from "../../components/hotels/HotelSearchBar.jsx";
-import { useHotelDetails } from "../../features/hotels/hotelHooks.js";
+import {
+  useHotelDetails,
+  useHotelPhotos,
+} from "../../features/hotels/hotelHooks.js";
 
 function getHotelLocation(hotel) {
   return [hotel?.city, hotel?.countryCode ?? hotel?.country]
@@ -54,6 +58,7 @@ function StarRating({ rating }) {
 export default function HotelDetailsPage() {
   const { hotelId } = useParams();
   const hotelDetails = useHotelDetails(hotelId);
+  const hotelPhotos = useHotelPhotos(hotelId);
   const hotel = hotelDetails.data;
   const isNotFound =
     hotelDetails.error?.response?.status === 404 ||
@@ -133,6 +138,11 @@ export default function HotelDetailsPage() {
               </button>
             </div>
           </section>
+
+          <HotelGallery
+            hotelName={getHotelName(hotel)}
+            photosQuery={hotelPhotos}
+          />
 
           <section className="hotel-details-section" aria-labelledby="hotel-overview-title">
             <p className="eyebrow">Overview</p>

@@ -921,6 +921,284 @@ a {
   background: #fdfcf9;
 }
 
+.hotel-gallery-shell {
+  display: grid;
+}
+
+.hotel-gallery {
+  overflow: hidden;
+  border: 1px solid rgba(31, 41, 55, 0.1);
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 18px 50px rgba(31, 41, 55, 0.08);
+}
+
+.hotel-gallery__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) repeat(2, minmax(150px, 0.45fr));
+  grid-template-rows: repeat(2, 170px);
+  gap: 8px;
+  padding: 8px;
+}
+
+.hotel-gallery__item {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  border: 0;
+  border-radius: 8px;
+  padding: 0;
+  background: #f8f6f1;
+  cursor: pointer;
+}
+
+.hotel-gallery__item--main {
+  grid-row: span 2;
+}
+
+.hotel-gallery__item img,
+.photo-gallery-modal__stage img,
+.photo-gallery-modal__thumbnail img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hotel-gallery__item::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(17, 24, 39, 0);
+  transition: background 160ms ease;
+}
+
+.hotel-gallery__item:hover::after,
+.hotel-gallery__item:focus-visible::after {
+  background: rgba(17, 24, 39, 0.16);
+}
+
+.hotel-gallery__item:focus-visible,
+.photo-gallery-modal__close:focus-visible,
+.photo-gallery-modal__nav:focus-visible,
+.photo-gallery-modal__thumbnail:focus-visible {
+  outline: 3px solid rgba(201, 162, 39, 0.62);
+  outline-offset: 2px;
+}
+
+.hotel-gallery__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 4px;
+  padding: 18px;
+  background: rgba(31, 41, 55, 0.72);
+  color: #ffffff;
+  font-weight: 850;
+  text-align: center;
+}
+
+.hotel-gallery__overlay small {
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.hotel-gallery--empty {
+  min-height: 340px;
+  padding: 8px;
+}
+
+.hotel-gallery__placeholder {
+  display: grid;
+  min-height: 324px;
+  place-items: center;
+  align-content: center;
+  padding: 36px;
+  border: 1px dashed rgba(139, 115, 85, 0.34);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(31, 41, 55, 0.08), rgba(201, 162, 39, 0.13)),
+    #fdfcf9;
+  color: #1f2937;
+  text-align: center;
+}
+
+.hotel-gallery__placeholder span {
+  display: inline-grid;
+  width: 74px;
+  height: 74px;
+  place-items: center;
+  margin-bottom: 18px;
+  border: 1px solid rgba(201, 162, 39, 0.42);
+  border-radius: 8px;
+  color: #c9a227;
+  font-size: 1.35rem;
+  font-weight: 900;
+}
+
+.hotel-gallery__placeholder h2 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 1.35rem;
+}
+
+.hotel-gallery__placeholder p:not(.eyebrow) {
+  max-width: 420px;
+  margin: 10px 0 0;
+  color: #4b5563;
+}
+
+body.modal-open {
+  overflow: hidden;
+}
+
+.photo-gallery-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 28px;
+}
+
+.photo-gallery-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: rgba(17, 24, 39, 0.78);
+  cursor: pointer;
+}
+
+.photo-gallery-modal__panel {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  width: min(1040px, 100%);
+  max-height: calc(100vh - 56px);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.32);
+}
+
+.photo-gallery-modal__header,
+.photo-gallery-modal__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px 20px;
+}
+
+.photo-gallery-modal__header {
+  border-bottom: 1px solid rgba(31, 41, 55, 0.08);
+}
+
+.photo-gallery-modal__header h2 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 1.18rem;
+  line-height: 1.2;
+}
+
+.photo-gallery-modal__header .eyebrow {
+  margin-bottom: 4px;
+}
+
+.photo-gallery-modal__close,
+.photo-gallery-modal__nav,
+.photo-gallery-modal__thumbnail {
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid rgba(31, 41, 55, 0.16);
+  border-radius: 8px;
+  background: #ffffff;
+  color: #1f2937;
+  cursor: pointer;
+}
+
+.photo-gallery-modal__close {
+  width: 42px;
+  height: 42px;
+  font-size: 1.2rem;
+  font-weight: 850;
+}
+
+.photo-gallery-modal__close:hover,
+.photo-gallery-modal__nav:hover {
+  border-color: #c9a227;
+  background: #c9a227;
+}
+
+.photo-gallery-modal__stage {
+  position: relative;
+  min-height: 360px;
+  background: #111827;
+}
+
+.photo-gallery-modal__stage img {
+  max-height: min(66vh, 620px);
+  object-fit: contain;
+}
+
+.photo-gallery-modal__nav {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  width: 44px;
+  height: 58px;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.92);
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.photo-gallery-modal__nav--previous {
+  left: 18px;
+}
+
+.photo-gallery-modal__nav--next {
+  right: 18px;
+}
+
+.photo-gallery-modal__footer {
+  border-top: 1px solid rgba(31, 41, 55, 0.08);
+  color: #4b5563;
+  font-weight: 800;
+}
+
+.photo-gallery-modal__thumbnails {
+  display: flex;
+  max-width: min(760px, 70vw);
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.photo-gallery-modal__thumbnail {
+  flex: 0 0 74px;
+  width: 74px;
+  height: 56px;
+  overflow: hidden;
+  padding: 0;
+  opacity: 0.72;
+}
+
+.photo-gallery-modal__thumbnail--active {
+  border-color: #c9a227;
+  box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.24);
+  opacity: 1;
+}
+
 @keyframes feedback-spin {
   to {
     transform: rotate(360deg);
@@ -934,6 +1212,25 @@ a {
 
   .hotel-search__submit {
     min-height: 54px;
+  }
+
+  .hotel-gallery__grid {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 280px repeat(2, 140px);
+  }
+
+  .hotel-gallery__item--main {
+    grid-column: span 2;
+    grid-row: span 1;
+  }
+
+  .photo-gallery-modal__footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .photo-gallery-modal__thumbnails {
+    max-width: 100%;
   }
 }
 
@@ -1013,5 +1310,44 @@ a {
 
   .hotel-details-section {
     padding: 26px 28px;
+  }
+
+  .hotel-gallery__grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: 260px repeat(4, 118px);
+  }
+
+  .hotel-gallery__item--main {
+    grid-column: auto;
+  }
+
+  .photo-gallery-modal {
+    padding: 12px;
+  }
+
+  .photo-gallery-modal__panel {
+    max-height: calc(100vh - 24px);
+  }
+
+  .photo-gallery-modal__header,
+  .photo-gallery-modal__footer {
+    padding: 14px;
+  }
+
+  .photo-gallery-modal__stage {
+    min-height: 300px;
+  }
+
+  .photo-gallery-modal__nav {
+    width: 38px;
+    height: 50px;
+  }
+
+  .photo-gallery-modal__nav--previous {
+    left: 10px;
+  }
+
+  .photo-gallery-modal__nav--next {
+    right: 10px;
   }
 }
