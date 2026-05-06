@@ -35,8 +35,8 @@ export default function HomePage() {
 
         .home-hero {
           position: relative;
-          overflow: hidden;
-          padding: 88px min(5vw, 56px) 56px;
+          overflow: visible;
+          padding: 46px min(5vw, 56px) 44px;
           background:
             linear-gradient(100deg, rgba(31, 41, 55, 0.94), rgba(31, 41, 55, 0.72)),
             linear-gradient(135deg, #8b7355, #f8f6f1);
@@ -50,97 +50,35 @@ export default function HomePage() {
         }
 
         .home-hero__content {
-          max-width: 760px;
+          max-width: 720px;
         }
 
-        .home-hero .eyebrow {
+        .home-hero__kicker {
+          margin: 0 0 8px;
           color: #c9a227;
-        }
-
-        .home-hero h1 {
-          max-width: 780px;
-          margin: 0;
-          color: #ffffff;
-          font-size: clamp(2.5rem, 7vw, 5.25rem);
-          line-height: 1.02;
-        }
-
-        .home-hero__copy {
-          max-width: 640px;
-          margin: 22px 0 0;
-          color: rgba(255, 255, 255, 0.82);
-          font-size: 1.12rem;
-        }
-
-        .home-hero__actions {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 12px;
-          margin-top: 32px;
-        }
-
-        .home-hero__actions .button--primary {
-          background: #ffffff;
-          color: #1f2937;
-        }
-
-        .home-hero__actions .button--primary:hover {
-          background: #c9a227;
-          color: #111827;
-        }
-
-        .home-hero__search {
-          margin-top: 48px;
-        }
-
-        .hotel-search {
-          display: grid;
-          gap: 18px;
-          padding: 22px;
-          border: 1px solid rgba(31, 41, 55, 0.1);
-          border-radius: 8px;
-          background: #ffffff;
-          color: #111827;
-          box-shadow: 0 18px 50px rgba(17, 24, 39, 0.16);
-        }
-
-        .hotel-search__grid {
-          display: grid;
-          grid-template-columns: 1.4fr repeat(5, minmax(120px, 1fr));
-          gap: 14px;
-        }
-
-        .hotel-search__field {
-          display: grid;
-          gap: 7px;
-        }
-
-        .hotel-search__field label {
-          color: #8b7355;
-          font-size: 0.78rem;
-          font-weight: 800;
+          font-size: 0.76rem;
+          font-weight: 700;
+          letter-spacing: 0.08em;
           text-transform: uppercase;
         }
 
-        .hotel-search__field input {
-          min-height: 46px;
-          width: 100%;
-          border: 1px solid rgba(31, 41, 55, 0.18);
-          border-radius: 8px;
-          padding: 10px 12px;
-          background: #fdfcf9;
-          color: #111827;
+        .home-hero h1 {
+          max-width: 720px;
+          margin: 0;
+          color: #ffffff;
+          font-size: clamp(2.2rem, 5.8vw, 4.5rem);
+          line-height: 1.04;
         }
 
-        .hotel-search__field input:focus {
-          border-color: #c9a227;
-          box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.18);
-          outline: none;
+        .home-hero__copy {
+          max-width: 600px;
+          margin: 14px 0 0;
+          color: rgba(255, 255, 255, 0.82);
+          font-size: 1.02rem;
         }
 
-        .hotel-search__submit {
-          width: fit-content;
-          min-width: 180px;
+        .home-hero__search {
+          margin-top: 28px;
         }
 
         .home-section {
@@ -240,7 +178,6 @@ export default function HomePage() {
         }
 
         @media (max-width: 980px) {
-          .hotel-search__grid,
           .featured-hotels,
           .home-benefits {
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -249,7 +186,7 @@ export default function HomePage() {
 
         @media (max-width: 640px) {
           .home-hero {
-            padding: 56px 0 36px;
+            padding: 34px 0 30px;
           }
 
           .home-section {
@@ -261,15 +198,9 @@ export default function HomePage() {
             flex-direction: column;
           }
 
-          .hotel-search__grid,
           .featured-hotels,
           .home-benefits {
             grid-template-columns: 1fr;
-          }
-
-          .hotel-search__submit,
-          .home-hero__actions .button {
-            width: 100%;
           }
         }
       `}</style>
@@ -277,20 +208,12 @@ export default function HomePage() {
       <section className="home-hero" aria-labelledby="home-title">
         <div className="home-hero__inner">
           <div className="home-hero__content">
-            <p className="eyebrow">Calm luxury stays</p>
-            <h1 id="home-title">Find a hotel that feels considered.</h1>
+            <p className="home-hero__kicker">Find your stay</p>
+            <h1 id="home-title">Book a calmer hotel stay.</h1>
             <p className="home-hero__copy">
-              Search by destination, dates, and guests, then continue into a
-              booking experience designed to feel polished and simple.
+              Search by city, dates, guests, rooms, and pet-friendly stays in one
+              clear place.
             </p>
-            <div className="home-hero__actions">
-              <Link to="/search" className="button button--primary">
-                Start search
-              </Link>
-              <Link to="/about" className="button button--secondary">
-                Learn more
-              </Link>
-            </div>
           </div>
 
           <div className="home-hero__search">
