@@ -4,6 +4,8 @@ import { Link, useParams } from "react-router-dom";
 import EmptyState from "../../components/feedback/EmptyState.jsx";
 import ErrorState from "../../components/feedback/ErrorState.jsx";
 import LoadingState from "../../components/feedback/LoadingState.jsx";
+import HotelActionHeader from "../../components/hotels/HotelActionHeader.jsx";
+import HotelDetailsTabs from "../../components/hotels/HotelDetailsTabs.jsx";
 import HotelGallery from "../../components/hotels/HotelGallery.jsx";
 import HotelSearchBar from "../../components/hotels/HotelSearchBar.jsx";
 import {
@@ -70,7 +72,7 @@ export default function HotelDetailsPage() {
 
   function handleSelectRoom() {
     document
-      .getElementById("hotel-rooms-placeholder")
+      .getElementById("rooms")
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
@@ -128,15 +130,7 @@ export default function HotelDetailsPage() {
               )}
             </div>
 
-            <div className="hotel-details-hero__action">
-              <button
-                className="button button--primary"
-                type="button"
-                onClick={handleSelectRoom}
-              >
-                Select a room
-              </button>
-            </div>
+            <HotelActionHeader onSelectRoom={handleSelectRoom} />
           </section>
 
           <HotelGallery
@@ -144,7 +138,13 @@ export default function HotelDetailsPage() {
             photosQuery={hotelPhotos}
           />
 
-          <section className="hotel-details-section" aria-labelledby="hotel-overview-title">
+          <HotelDetailsTabs />
+
+          <section
+            className="hotel-details-section"
+            id="overview"
+            aria-labelledby="hotel-overview-title"
+          >
             <p className="eyebrow">Overview</p>
             <h2 id="hotel-overview-title">About this stay</h2>
             <p>
@@ -154,12 +154,52 @@ export default function HotelDetailsPage() {
 
           <section
             className="hotel-details-section hotel-details-section--placeholder"
-            id="hotel-rooms-placeholder"
+            id="about"
+            aria-labelledby="hotel-about-title"
+          >
+            <p className="eyebrow">About</p>
+            <h2 id="hotel-about-title">Hotel information</h2>
+            <p>Detailed hotel information will be added in a future task.</p>
+          </section>
+
+          <section
+            className="hotel-details-section hotel-details-section--placeholder"
+            id="rooms"
             aria-labelledby="hotel-rooms-title"
           >
             <p className="eyebrow">Rooms</p>
             <h2 id="hotel-rooms-title">Select a room</h2>
             <p>Rooms will be added in a future task.</p>
+          </section>
+
+          <section
+            className="hotel-details-section hotel-details-section--placeholder"
+            id="accessibility"
+            aria-labelledby="hotel-accessibility-title"
+          >
+            <p className="eyebrow">Accessibility</p>
+            <h2 id="hotel-accessibility-title">Accessibility details</h2>
+            <p>Accessibility details will be added in a future task.</p>
+          </section>
+
+          <section
+            className="hotel-details-section hotel-details-section--placeholder"
+            id="policies"
+            aria-labelledby="hotel-policies-title"
+          >
+            <p className="eyebrow">Policies</p>
+            <h2 id="hotel-policies-title">Stay policies</h2>
+            <p>Policies will be added in a future task.</p>
+          </section>
+
+          <section
+            className="hotel-details-section hotel-details-section--placeholder"
+            id="reviews"
+            aria-labelledby="hotel-reviews-title"
+          >
+            <p className="eyebrow">Reviews</p>
+            <h2 id="hotel-reviews-title">Guest reviews</h2>
+            <p>Reviews will be added in a future task.</p>
           </section>
         </>
       ) : null}

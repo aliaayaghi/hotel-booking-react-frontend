@@ -893,14 +893,9 @@ a {
   color: #4b5563;
 }
 
-.hotel-details-hero__action {
-  display: flex;
-  justify-content: flex-end;
-}
-
 .hotel-details-section {
   padding: 28px 34px;
-  scroll-margin-top: 96px;
+  scroll-margin-top: 150px;
 }
 
 .hotel-details-section h2 {
@@ -919,6 +914,82 @@ a {
 .hotel-details-section--placeholder {
   border-style: dashed;
   background: #fdfcf9;
+}
+
+.hotel-action-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.hotel-action-header__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  gap: 8px;
+  border: 1px solid rgba(31, 41, 55, 0.2);
+  border-radius: 8px;
+  padding: 10px 14px;
+  background: #ffffff;
+  color: #1f2937;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.hotel-action-header__button:hover,
+.hotel-action-header__button:focus-visible {
+  border-color: rgba(201, 162, 39, 0.62);
+  background: rgba(201, 162, 39, 0.1);
+}
+
+.hotel-action-header__button--icon span:first-child {
+  color: #8b7355;
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.hotel-action-header__primary {
+  min-width: 142px;
+}
+
+.hotel-details-tabs {
+  position: sticky;
+  top: 78px;
+  z-index: 8;
+  overflow: hidden;
+  border: 1px solid rgba(31, 41, 55, 0.1);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 14px 34px rgba(31, 41, 55, 0.1);
+  backdrop-filter: blur(14px);
+}
+
+.hotel-details-tabs__scroller {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow-x: auto;
+  padding: 8px;
+}
+
+.hotel-details-tabs__link {
+  flex: 0 0 auto;
+  border-radius: 6px;
+  padding: 10px 14px;
+  color: #4b5563;
+  font-size: 0.92rem;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.hotel-details-tabs__link:hover,
+.hotel-details-tabs__link:focus-visible {
+  background: rgba(201, 162, 39, 0.12);
+  color: #1f2937;
+  outline: none;
 }
 
 .hotel-gallery-shell {
@@ -1304,8 +1375,12 @@ body.modal-open {
     padding: 28px;
   }
 
-  .hotel-details-hero__action {
+  .hotel-action-header {
     justify-content: flex-start;
+  }
+
+  .hotel-details-tabs {
+    top: 72px;
   }
 
   .hotel-details-section {
