@@ -23,6 +23,7 @@ const preservedSearchFields = [
   "checkOut",
   "adults",
   "children",
+  "childrenAges",
   "rooms",
   "size",
 ];

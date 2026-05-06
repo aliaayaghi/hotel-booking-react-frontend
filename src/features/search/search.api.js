@@ -6,6 +6,7 @@ export const HOTEL_SEARCH_PARAMS = [
   "checkOut",
   "adults",
   "children",
+  "childrenAges",
   "rooms",
   "stars",
   "priceMin",
@@ -52,6 +53,15 @@ export function buildHotelSearchParams(searchParams) {
 export async function searchHotels(searchParams) {
   const params = buildHotelSearchParams(searchParams);
   const response = await axiosClient.get("/api/hotels/search", { params });
+
+  return response.data;
+}
+
+export async function getHotelCitySuggestions(query, options = {}) {
+  const response = await axiosClient.get("/api/hotels/autocomplete", {
+    params: { q: query },
+    signal: options.signal,
+  });
 
   return response.data;
 }

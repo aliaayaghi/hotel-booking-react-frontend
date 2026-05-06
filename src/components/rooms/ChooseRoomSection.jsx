@@ -5,6 +5,10 @@ import { useSearchParams } from "react-router-dom";
 import EmptyState from "../feedback/EmptyState.jsx";
 import ErrorState from "../feedback/ErrorState.jsx";
 import LoadingState from "../feedback/LoadingState.jsx";
+import {
+  DateRangeField,
+  GuestSelector,
+} from "../hotels/HotelSearchBar.jsx";
 import RoomCard from "./RoomCard.jsx";
 import RoomInfoModal from "./RoomInfoModal.jsx";
 import { checkHotelRoomAvailability } from "../../features/rooms/rooms.api.js";
@@ -19,10 +23,6 @@ function getRooms(data) {
   }
 
   return data.rooms ?? data.items ?? data.content ?? data.results ?? [];
-}
-
-function getBooleanLabel(value) {
-  return value ? "Yes" : "No";
 }
 
 function getRoomId(room) {
@@ -93,40 +93,39 @@ export default function ChooseRoomSection({ hotelId, roomsQuery, searchValues })
     setAvailabilityByRoom({});
   }, [hotelId, searchValues.checkIn, searchValues.checkOut, roomQuantity]);
 
-  function updateSearchParam(name, value) {
+  function updateSearchParams(updates) {
     setSearchParams(
       (currentParams) => {
         const nextParams = new URLSearchParams(currentParams);
 
-        if (name === "petsAllowed") {
-          if (value) {
-            nextParams.set("petsAllowed", "true");
-          } else {
-            nextParams.delete("petsAllowed");
+        Object.entries(updates).forEach(([name, value]) => {
+          if (name === "petsAllowed") {
+            if (value) {
+              nextParams.set("petsAllowed", "true");
+            } else {
+              nextParams.delete("petsAllowed");
+            }
+
+            return;
           }
 
-          return nextParams;
-        }
+          if (value === "") {
+            nextParams.delete(name);
+          } else {
+            nextParams.set(name, value);
+          }
 
-        if (value === "") {
-          nextParams.delete(name);
-        } else {
-          nextParams.set(name, value);
-        }
+          if (name === "children" && Number(value) <= 0) {
+            nextParams.delete("childrenAges");
+          }
+        });
 
-        if (name === "children" && Number(value) <= 0) {
-          nextParams.delete("childrenAges");
-        }
+        nextParams.set("page", "0");
 
         return nextParams;
       },
       { replace: true },
     );
-  }
-
-  function handleControlChange(event) {
-    const { checked, name, type, value } = event.target;
-    updateSearchParam(name, type === "checkbox" ? checked : value);
   }
 
   function handleCheckAvailability(room) {
@@ -168,82 +167,20 @@ export default function ChooseRoomSection({ hotelId, roomsQuery, searchValues })
           <SearchSummaryField label="Destination" value={searchValues.city} />
         ) : null}
 
-        <label className="choose-room-search__field">
-          <span>Check-in</span>
-          <input
-            name="checkIn"
-            onChange={handleControlChange}
-            type="date"
-            value={searchValues.checkIn}
-          />
-        </label>
+        <DateRangeField
+          checkIn={searchValues.checkIn}
+          checkOut={searchValues.checkOut}
+          onChange={updateSearchParams}
+        />
 
-        <label className="choose-room-search__field">
-          <span>Check-out</span>
-          <input
-            name="checkOut"
-            onChange={handleControlChange}
-            type="date"
-            value={searchValues.checkOut}
-          />
-        </label>
-
-        <label className="choose-room-search__field">
-          <span>Adults</span>
-          <input
-            min="1"
-            name="adults"
-            onChange={handleControlChange}
-            type="number"
-            value={searchValues.adults}
-          />
-        </label>
-
-        <label className="choose-room-search__field">
-          <span>Children</span>
-          <input
-            min="0"
-            name="children"
-            onChange={handleControlChange}
-            type="number"
-            value={searchValues.children}
-          />
-        </label>
-
-        {Number(searchValues.children) > 0 || searchValues.childrenAges ? (
-          <label className="choose-room-search__field">
-            <span>Children ages</span>
-            <input
-              name="childrenAges"
-              onChange={handleControlChange}
-              placeholder="Example: 7,10"
-              type="text"
-              value={searchValues.childrenAges}
-            />
-          </label>
-        ) : null}
-
-        <label className="choose-room-search__field">
-          <span>Rooms</span>
-          <input
-            min="1"
-            name="rooms"
-            onChange={handleControlChange}
-            type="number"
-            value={searchValues.rooms}
-          />
-        </label>
-
-        <label className="choose-room-search__field choose-room-search__field--checkbox">
-          <span>Pets</span>
-          <input
-            checked={searchValues.petsAllowed}
-            name="petsAllowed"
-            onChange={handleControlChange}
-            type="checkbox"
-          />
-          <strong>{getBooleanLabel(searchValues.petsAllowed)}</strong>
-        </label>
+        <GuestSelector
+          adults={searchValues.adults || "2"}
+          children={searchValues.children || "0"}
+          childrenAges={searchValues.childrenAges}
+          onChange={updateSearchParams}
+          petsAllowed={searchValues.petsAllowed}
+          rooms={searchValues.rooms || "1"}
+        />
       </div>
 
       {!datesSelected ? (
