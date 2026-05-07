@@ -151,7 +151,9 @@ export default function HotelCard({ hotel }) {
 
         {location ? <p className="hotel-card__location">{location}</p> : null}
 
-        {overview ? <p className="hotel-card__overview">{overview}</p> : null}
+        <p className="hotel-card__overview">
+          {overview || "Overview needs backend verification"}
+        </p>
 
         <div className="hotel-card__footer">
           <span className="hotel-card__review-note">
@@ -164,8 +166,6 @@ export default function HotelCard({ hotel }) {
             <span className="hotel-card__price">Price needs backend verification</span>
           )}
         </div>
-
-        <span className="button button--primary">View details</span>
       </div>
     </Link>
   );

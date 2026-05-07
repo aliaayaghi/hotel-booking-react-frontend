@@ -28,15 +28,118 @@ const preservedSearchFields = [
   "size",
 ];
 
+const multiSelectFields = new Set(["stars", "hotelType", "roomType", "bedType", "view"]);
+
+const filterOptions = {
+  stars: [
+    { value: "5", label: "5 stars" },
+    { value: "4", label: "4 stars" },
+    { value: "3", label: "3 stars" },
+    { value: "2", label: "2 stars" },
+    { value: "1", label: "1 star" },
+  ],
+  hotelType: [
+    { value: "HOTEL", label: "Hotel" },
+    { value: "RESORT", label: "Resort" },
+    { value: "BOUTIQUE", label: "Boutique" },
+    { value: "HOSTEL", label: "Hostel" },
+    { value: "APARTMENT", label: "Apartment" },
+    { value: "VILLA", label: "Villa" },
+    { value: "GUESTHOUSE", label: "Guesthouse" },
+    { value: "MOTEL", label: "Motel" },
+    { value: "INN", label: "Inn" },
+    { value: "LODGE", label: "Lodge" },
+  ],
+  roomType: [
+    { value: "STANDARD", label: "Standard" },
+    { value: "DELUXE", label: "Deluxe" },
+    { value: "SUITE", label: "Suite" },
+    { value: "STUDIO", label: "Studio" },
+    { value: "FAMILY", label: "Family" },
+    { value: "VILLA", label: "Villa" },
+  ],
+  bedType: [
+    { value: "KING", label: "King" },
+    { value: "QUEEN", label: "Queen" },
+    { value: "TWIN", label: "Twin" },
+    { value: "DOUBLE", label: "Double" },
+    { value: "SINGLE", label: "Single" },
+    { value: "BUNK", label: "Bunk" },
+  ],
+  view: [
+    { value: "NONE", label: "None" },
+    { value: "SEA", label: "Sea" },
+    { value: "CITY", label: "City" },
+    { value: "GARDEN", label: "Garden" },
+    { value: "POOL", label: "Pool" },
+  ],
+};
+
+const sortOptions = [
+  { value: "", label: "Backend default" },
+  { value: "name", label: "Name" },
+  { value: "starRating", label: "Stars" },
+  { value: "lowestPrice", label: "Price" },
+  { value: "availableRooms", label: "Available rooms" },
+];
+
+function getValues(searchParams, field) {
+  const values = searchParams.getAll(field);
+  const fallbackValue = searchParams.get(field);
+
+  if (values.length > 1 || !fallbackValue?.includes(",")) {
+    return values;
+  }
+
+  return fallbackValue.split(",").filter(Boolean);
+}
+
 function getInitialFilters(searchParams) {
   return filterFields.reduce((values, field) => {
-    values[field] = searchParams.get(field) ?? "";
+    if (field === "sortOrder") {
+      values[field] = searchParams.get(field) ?? "asc";
+      return values;
+    }
+
+    values[field] = multiSelectFields.has(field)
+      ? getValues(searchParams, field)
+      : searchParams.get(field) ?? "";
     return values;
   }, {});
 }
 
-export default function FilterSidebar({ searchParams }) {
+function getPriceValue(value, fallback) {
+  const price = Number(value);
+
+  return Number.isFinite(price) ? String(price) : String(fallback);
+}
+
+function ToggleGroup({ name, options, title, values, onChange }) {
+  return (
+    <fieldset className="filter-toggle-group">
+      <legend>{title}</legend>
+      <div className="filter-toggle-group__options">
+        {options.map((option) => (
+          <label key={option.value}>
+            <input
+              checked={values.includes(option.value)}
+              name={name}
+              type="checkbox"
+              value={option.value}
+              onChange={onChange}
+            />
+            {option.label}
+          </label>
+        ))}
+      </div>
+    </fieldset>
+  );
+}
+
+export default function FilterSidebar({ priceBounds = { min: 0, max: 1000 }, searchParams }) {
   const navigate = useNavigate();
+  const minPrice = priceBounds.min;
+  const maxPrice = Math.max(priceBounds.max, minPrice);
   const initialFilters = useMemo(
     () => getInitialFilters(searchParams),
     [searchParams],
@@ -51,8 +154,34 @@ export default function FilterSidebar({ searchParams }) {
     const { name, type, value, checked } = event.target;
     setFilters((currentFilters) => ({
       ...currentFilters,
-      [name]: type === "checkbox" ? String(checked) : value,
+      [name]: type === "checkbox" && multiSelectFields.has(name)
+        ? checked
+          ? [...currentFilters[name], value]
+          : currentFilters[name].filter((item) => item !== value)
+        : type === "checkbox"
+          ? String(checked)
+          : value,
     }));
+  }
+
+  function handlePriceChange(event) {
+    const { name, value } = event.target;
+
+    setFilters((currentFilters) => {
+      const nextFilters = { ...currentFilters, [name]: value };
+      const nextMin = Number(nextFilters.priceMin || minPrice);
+      const nextMax = Number(nextFilters.priceMax || maxPrice);
+
+      if (name === "priceMin" && nextMin > nextMax) {
+        nextFilters.priceMax = value;
+      }
+
+      if (name === "priceMax" && nextMax < nextMin) {
+        nextFilters.priceMin = value;
+      }
+
+      return nextFilters;
+    });
   }
 
   function buildParams(nextFilters) {
@@ -66,7 +195,9 @@ export default function FilterSidebar({ searchParams }) {
     });
 
     Object.entries(nextFilters).forEach(([field, value]) => {
-      if (value) {
+      if (Array.isArray(value)) {
+        value.forEach((item) => params.append(field, item));
+      } else if (value) {
         params.set(field, value);
       }
     });
@@ -94,84 +225,76 @@ export default function FilterSidebar({ searchParams }) {
       </div>
 
       <form className="filter-sidebar__form" onSubmit={handleSubmit}>
-        <label className="filter-field">
-          <span>Stars</span>
-          <select name="stars" value={filters.stars} onChange={handleChange}>
-            <option value="">Any</option>
-            <option value="5">5 stars</option>
-            <option value="4">4 stars</option>
-            <option value="3">3 stars</option>
-            <option value="2">2 stars</option>
-            <option value="1">1 star</option>
-          </select>
-        </label>
+        <ToggleGroup
+          name="stars"
+          options={filterOptions.stars}
+          title="Stars"
+          values={filters.stars}
+          onChange={handleChange}
+        />
 
-        <div className="filter-sidebar__split">
-          <label className="filter-field">
-            <span>Min price</span>
+        <div className="filter-price-range">
+          <div className="filter-price-range__labels">
+            <span>Price range</span>
+            <strong>
+              ${getPriceValue(filters.priceMin, minPrice)} - ${getPriceValue(filters.priceMax, maxPrice)}
+            </strong>
+          </div>
+          <label>
+            Min
             <input
-              min="0"
+              max={maxPrice}
+              min={minPrice}
               name="priceMin"
-              type="number"
-              value={filters.priceMin}
-              onChange={handleChange}
+              type="range"
+              value={getPriceValue(filters.priceMin, minPrice)}
+              onChange={handlePriceChange}
             />
           </label>
-          <label className="filter-field">
-            <span>Max price</span>
+          <label>
+            Max
             <input
-              min="0"
+              max={maxPrice}
+              min={minPrice}
               name="priceMax"
-              type="number"
-              value={filters.priceMax}
-              onChange={handleChange}
+              type="range"
+              value={getPriceValue(filters.priceMax, maxPrice)}
+              onChange={handlePriceChange}
             />
           </label>
         </div>
 
-        <label className="filter-field">
-          <span>Hotel type</span>
-          <input
-            name="hotelType"
-            placeholder="Resort, hotel, villa"
-            type="text"
-            value={filters.hotelType}
-            onChange={handleChange}
-          />
-        </label>
+        <ToggleGroup
+          name="hotelType"
+          options={filterOptions.hotelType}
+          title="Hotel type"
+          values={filters.hotelType}
+          onChange={handleChange}
+        />
 
-        <label className="filter-field">
-          <span>Room type</span>
-          <input
-            name="roomType"
-            placeholder="Suite, deluxe"
-            type="text"
-            value={filters.roomType}
-            onChange={handleChange}
-          />
-        </label>
+        <ToggleGroup
+          name="roomType"
+          options={filterOptions.roomType}
+          title="Room type"
+          values={filters.roomType}
+          onChange={handleChange}
+        />
 
-        <label className="filter-field">
-          <span>Bed type</span>
-          <input
-            name="bedType"
-            placeholder="King, queen"
-            type="text"
-            value={filters.bedType}
-            onChange={handleChange}
-          />
-        </label>
+        <ToggleGroup
+          name="bedType"
+          options={filterOptions.bedType}
+          title="Bed type"
+          values={filters.bedType}
+          onChange={handleChange}
+        />
 
-        <label className="filter-field">
-          <span>View</span>
-          <input
-            name="view"
-            placeholder="Sea, city, garden"
-            type="text"
-            value={filters.view}
-            onChange={handleChange}
-          />
-        </label>
+        <ToggleGroup
+          name="view"
+          options={filterOptions.view}
+          title="View"
+          values={filters.view}
+          onChange={handleChange}
+        />
 
         <div className="filter-sidebar__checks">
           <label>
@@ -215,23 +338,20 @@ export default function FilterSidebar({ searchParams }) {
         <div className="filter-sidebar__split">
           <label className="filter-field">
             <span>Sort by</span>
-            <input
-              name="sortBy"
-              placeholder="Backend sort field"
-              type="text"
-              value={filters.sortBy}
-              onChange={handleChange}
-            />
+            <select name="sortBy" value={filters.sortBy} onChange={handleChange}>
+              {sortOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
           </label>
           <label className="filter-field">
             <span>Order</span>
-            <input
-              name="sortOrder"
-              placeholder="asc or desc"
-              type="text"
-              value={filters.sortOrder}
-              onChange={handleChange}
-            />
+            <select name="sortOrder" value={filters.sortOrder} onChange={handleChange}>
+              <option value="asc">Ascending</option>
+              <option value="desc">Descending</option>
+            </select>
           </label>
         </div>
 

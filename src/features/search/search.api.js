@@ -25,16 +25,35 @@ export const HOTEL_SEARCH_PARAMS = [
   "size",
 ];
 
+const multiValueParams = new Set([
+  "childrenAges",
+  "stars",
+  "hotelType",
+  "hotelAmenities",
+  "amenityCategories",
+  "roomType",
+  "bedType",
+  "view",
+]);
+
 export function buildHotelSearchParams(searchParams) {
   const params = {};
 
   HOTEL_SEARCH_PARAMS.forEach((paramName) => {
     const value =
       searchParams instanceof URLSearchParams
-        ? searchParams.get(paramName)
+        ? multiValueParams.has(paramName)
+          ? searchParams.getAll(paramName)
+          : searchParams.get(paramName)
         : searchParams?.[paramName];
 
-    if (value !== undefined && value !== null && value !== "") {
+    if (Array.isArray(value)) {
+      const values = value.filter((item) => item !== undefined && item !== null && item !== "");
+
+      if (values.length > 0) {
+        params[paramName] = values;
+      }
+    } else if (value !== undefined && value !== null && value !== "") {
       params[paramName] = value;
     }
   });
@@ -50,9 +69,26 @@ export function buildHotelSearchParams(searchParams) {
   return params;
 }
 
+function toRequestParams(params) {
+  const requestParams = new URLSearchParams();
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (Array.isArray(value)) {
+      value.forEach((item) => requestParams.append(key, item));
+      return;
+    }
+
+    requestParams.set(key, value);
+  });
+
+  return requestParams;
+}
+
 export async function searchHotels(searchParams) {
   const params = buildHotelSearchParams(searchParams);
-  const response = await axiosClient.get("/api/hotels/search", { params });
+  const response = await axiosClient.get("/api/hotels/search", {
+    params: toRequestParams(params),
+  });
 
   return response.data;
 }

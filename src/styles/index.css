@@ -699,8 +699,10 @@ a {
 }
 
 .filter-sidebar {
+  align-self: start;
   position: sticky;
   top: 88px;
+  overflow: visible;
   padding: 18px;
 }
 
@@ -753,11 +755,92 @@ a {
   color: #111827;
 }
 
+.filter-field select {
+  font-size: 0.84rem;
+}
+
+.filter-field select option {
+  font-size: 0.84rem;
+}
+
 .filter-field input:focus,
 .filter-field select:focus {
   border-color: #c9a227;
   box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.18);
   outline: none;
+}
+
+.filter-price-range,
+.filter-toggle-group {
+  display: grid;
+  gap: 9px;
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+
+.filter-price-range__labels {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.filter-price-range__labels span,
+.filter-toggle-group legend {
+  color: #8b7355;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.filter-price-range__labels strong {
+  color: #1f2937;
+  font-size: 0.82rem;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.filter-price-range label {
+  display: grid;
+  gap: 5px;
+  color: #374151;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.filter-price-range input[type="range"] {
+  width: 100%;
+  accent-color: #c9a227;
+}
+
+.filter-toggle-group__options {
+  display: grid;
+  gap: 7px;
+}
+
+.filter-toggle-group__options label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
+  color: #374151;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.filter-toggle-group__options input {
+  width: 16px;
+  height: 16px;
+  accent-color: #c9a227;
+}
+
+.filter-toggle-group__options label:has(input:checked) {
+  color: #1f2937;
 }
 
 .filter-sidebar__checks {
@@ -798,6 +881,18 @@ a {
   display: grid;
   grid-template-columns: 240px minmax(0, 1fr);
   overflow: hidden;
+  color: inherit;
+  text-decoration: none;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.hotel-card:hover {
+  border-color: rgba(201, 162, 39, 0.45);
+  box-shadow: 0 20px 55px rgba(31, 41, 55, 0.12);
+  transform: translateY(-1px);
 }
 
 .hotel-card__media {

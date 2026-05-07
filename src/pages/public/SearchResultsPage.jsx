@@ -50,6 +50,32 @@ function getCurrentPage(searchParams, data) {
   return data?.number ?? data?.page ?? data?.data?.number ?? urlPage;
 }
 
+function getHotelPrice(hotel) {
+  return (
+    hotel?.lowestPrice ??
+    hotel?.startingPrice ??
+    hotel?.minPrice ??
+    hotel?.priceFrom ??
+    hotel?.lowestRoomPrice ??
+    hotel?.price
+  );
+}
+
+function getPriceBounds(hotels) {
+  const prices = hotels
+    .map((hotel) => Number(getHotelPrice(hotel)))
+    .filter((price) => Number.isFinite(price));
+
+  if (prices.length === 0) {
+    return { min: 0, max: 1000 };
+  }
+
+  return {
+    min: Math.floor(Math.min(...prices)),
+    max: Math.ceil(Math.max(...prices)),
+  };
+}
+
 function ResultCount({ searchParams, totalResults }) {
   const city = searchParams.get("city");
   const placeLabel = city ? city : "Search results";
@@ -105,6 +131,7 @@ export default function SearchResultsPage() {
   const totalResults = getTotalResults(hotelSearch.data, hotels);
   const totalPages = getTotalPages(hotelSearch.data);
   const currentPage = getCurrentPage(searchParams, hotelSearch.data);
+  const priceBounds = getPriceBounds(hotels);
 
   const backendError = hotelSearch.isError
     ? (hotelSearch.error?.response?.data?.message ??
@@ -126,7 +153,7 @@ export default function SearchResultsPage() {
       <ResultCount searchParams={searchParams} totalResults={totalResults} />
 
       <div className="search-page__layout">
-        <FilterSidebar searchParams={searchParams} />
+        <FilterSidebar priceBounds={priceBounds} searchParams={searchParams} />
 
         <section className="search-page__results" aria-label="Hotel search results">
           {hotelSearch.isLoading ? (
