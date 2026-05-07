@@ -9,6 +9,7 @@ import {
   getHotelNearbyPlaces,
   getHotelPetsPolicy,
   getHotelPhotos,
+  getPublicHotels,
 } from "./hotels.api.js";
 import { getHotelRooms } from "../rooms/rooms.api.js";
 import {
@@ -18,6 +19,7 @@ import {
 
 export const hotelDetailQueryKeys = {
   all: ["hotels"],
+  list: (params) => ["hotels", "list", params],
   detail: (hotelId) => ["hotels", "detail", hotelId],
   photos: (hotelId) => ["hotels", "detail", hotelId, "photos"],
   amenities: (hotelId) => ["hotels", "detail", hotelId, "amenities"],
@@ -52,6 +54,13 @@ export function useHotelDetails(hotelId) {
     queryKey: hotelDetailQueryKeys.detail(hotelId),
     queryFn: () => getHotelById(hotelId),
     enabled: hasHotelId(hotelId),
+  });
+}
+
+export function usePublicHotels(params = {}) {
+  return useQuery({
+    queryKey: hotelDetailQueryKeys.list(params),
+    queryFn: () => getPublicHotels(params),
   });
 }
 

@@ -22,6 +22,12 @@ function hotelPath(hotelId, suffix = "") {
   return `/api/hotels/${encodeURIComponent(hotelId)}${suffix}`;
 }
 
+export async function getPublicHotels(params = {}) {
+  const response = await axiosClient.get("/api/hotels", { params });
+
+  return unwrapApiResponse(response.data);
+}
+
 export async function getHotelById(hotelId) {
   const response = await axiosClient.get(hotelPath(hotelId));
 

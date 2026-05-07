@@ -1,30 +1,170 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
+import EmptyState from "../../components/feedback/EmptyState.jsx";
+import ErrorState from "../../components/feedback/ErrorState.jsx";
+import LoadingState from "../../components/feedback/LoadingState.jsx";
 import HotelSearchBar from "../../components/hotels/HotelSearchBar.jsx";
+import {
+  useHotelPhotos,
+  usePublicHotels,
+} from "../../features/hotels/hotelHooks.js";
 
-const featuredHotels = [
-  {
-    name: "Harbor View Retreat",
-    location: "Placeholder destination",
-    detail: "Frontend-only featured hotel placeholder",
-    tone: "City calm",
-  },
-  {
-    name: "The Grand Courtyard",
-    location: "Placeholder destination",
-    detail: "Frontend-only featured hotel placeholder",
-    tone: "Heritage stay",
-  },
-  {
-    name: "Azure Garden Suites",
-    location: "Placeholder destination",
-    detail: "Frontend-only featured hotel placeholder",
-    tone: "Quiet luxury",
-  },
-];
+const API_BASE_URL = "http://localhost:8080";
+
+function getHotelsFromResponse(data) {
+  if (Array.isArray(data)) {
+    return data;
+  }
+
+  if (Array.isArray(data?.content)) {
+    return data.content;
+  }
+
+  if (Array.isArray(data?.hotels)) {
+    return data.hotels;
+  }
+
+  if (Array.isArray(data?.items)) {
+    return data.items;
+  }
+
+  if (Array.isArray(data?.data)) {
+    return data.data;
+  }
+
+  if (Array.isArray(data?.data?.content)) {
+    return data.data.content;
+  }
+
+  return [];
+}
+
+function getHotelImage(hotel) {
+  const firstPhoto = Array.isArray(hotel?.photos) ? hotel.photos[0] : null;
+
+  return (
+    hotel?.mainPhotoUrl ??
+    hotel?.coverPhotoUrl ??
+    hotel?.photoUrl ??
+    hotel?.imageUrl ??
+    firstPhoto?.url ??
+    firstPhoto?.photoUrl ??
+    ""
+  );
+}
+
+function getPhotosFromResponse(data) {
+  if (Array.isArray(data)) {
+    return data;
+  }
+
+  if (Array.isArray(data?.content)) {
+    return data.content;
+  }
+
+  if (Array.isArray(data?.photos)) {
+    return data.photos;
+  }
+
+  if (Array.isArray(data?.items)) {
+    return data.items;
+  }
+
+  if (Array.isArray(data?.data)) {
+    return data.data;
+  }
+
+  if (Array.isArray(data?.data?.content)) {
+    return data.data.content;
+  }
+
+  return [];
+}
+
+function getPhotoUrl(photo) {
+  if (typeof photo === "string") {
+    return photo;
+  }
+
+  return photo?.url ?? photo?.photoUrl ?? photo?.imageUrl ?? "";
+}
+
+function normalizeImageUrl(url) {
+  if (!url) {
+    return "";
+  }
+
+  if (/^(https?:|data:|blob:)/i.test(url)) {
+    return url;
+  }
+
+  return `${API_BASE_URL}${url.startsWith("/") ? "" : "/"}${url}`;
+}
+
+function getHotelLocation(hotel) {
+  return [hotel?.city, hotel?.countryCode ?? hotel?.country]
+    .filter(Boolean)
+    .join(", ");
+}
+
+function StarRating({ rating }) {
+  const numericRating = Math.max(0, Math.min(5, Math.round(Number(rating))));
+
+  if (!numericRating) {
+    return null;
+  }
+
+  return (
+    <span className="hotel-card__stars" aria-label={`${numericRating} star hotel`}>
+      {Array.from({ length: 5 }, (_, index) => (
+        <span
+          aria-hidden="true"
+          className={index < numericRating ? "hotel-card__star--filled" : ""}
+          key={index}
+        >
+          {"\u2605"}
+        </span>
+      ))}
+    </span>
+  );
+}
+
+function FeaturedHotelCard({ hotel }) {
+  const hotelId = hotel?.id ?? hotel?.hotelId;
+  const photosQuery = useHotelPhotos(hotelId);
+  const photos = photosQuery.isSuccess ? getPhotosFromResponse(photosQuery.data) : [];
+  const hotelName = hotel?.name ?? "Unnamed hotel";
+  const firstPhotoUrl = photos.length > 0 ? getPhotoUrl(photos[0]) : "";
+  const image = normalizeImageUrl(getHotelImage(hotel) || firstPhotoUrl);
+  const location = getHotelLocation(hotel);
+  const type = hotel?.type ?? hotel?.hotelType ?? "Hotel";
+  const rating = hotel?.starRating ?? hotel?.stars;
+  const detail = hotel?.overview ?? hotel?.description ?? hotel?.address ?? location;
+  const detailsPath = hotelId ? `/hotels/${encodeURIComponent(hotelId)}` : "/search";
+
+  return (
+    <Link className="featured-card" to={detailsPath}>
+      <div className="featured-card__image">
+        {image ? <img src={image} alt={hotelName} /> : <span>{hotelName.slice(0, 2)}</span>}
+      </div>
+      <div className="featured-card__body">
+        <div className="featured-card__meta">
+          <StarRating rating={rating} />
+        </div>
+        <h3>{hotelName}</h3>
+        {type ? <p className="featured-card__type">{type}</p> : null}
+        {location ? <p>{location}</p> : null}
+        {detail ? <p>{detail}</p> : null}
+      </div>
+    </Link>
+  );
+}
 
 export default function HomePage() {
+  const featuredHotelsQuery = usePublicHotels({ page: 0, size: 10 });
+  const featuredHotels = getHotelsFromResponse(featuredHotelsQuery.data).slice(0, 10);
+
   return (
     <main className="public-page home-page">
       <style>{`
@@ -108,39 +248,84 @@ export default function HomePage() {
 
         .featured-hotels {
           display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
+          grid-auto-columns: minmax(280px, 340px);
+          grid-auto-flow: column;
+          grid-template-columns: none;
           gap: 20px;
+          overflow-x: auto;
+          overscroll-behavior-inline: contain;
+          padding: 2px 0 16px;
+          scroll-snap-type: x proximity;
+          scrollbar-color: rgba(201, 162, 39, 0.72) rgba(31, 41, 55, 0.08);
+          scrollbar-width: thin;
+        }
+
+        .featured-hotels::-webkit-scrollbar {
+          height: 10px;
+        }
+
+        .featured-hotels::-webkit-scrollbar-track {
+          border-radius: 999px;
+          background: rgba(31, 41, 55, 0.08);
+        }
+
+        .featured-hotels::-webkit-scrollbar-thumb {
+          border-radius: 999px;
+          background: rgba(201, 162, 39, 0.72);
         }
 
         .featured-card {
+          display: block;
+          scroll-snap-align: start;
           overflow: hidden;
           border: 1px solid rgba(31, 41, 55, 0.09);
           border-radius: 8px;
           background: #ffffff;
           box-shadow: 0 18px 50px rgba(31, 41, 55, 0.08);
+          text-decoration: none;
+          transition:
+            border-color 0.2s ease,
+            box-shadow 0.2s ease,
+            transform 0.2s ease;
+        }
+
+        .featured-card:hover {
+          border-color: rgba(201, 162, 39, 0.46);
+          box-shadow: 0 22px 58px rgba(31, 41, 55, 0.12);
+          transform: translateY(-2px);
         }
 
         .featured-card__image {
+          display: grid;
           min-height: 190px;
+          place-items: center;
           background:
             linear-gradient(135deg, rgba(31, 41, 55, 0.16), rgba(201, 162, 39, 0.18)),
             #f8f6f1;
+          color: rgba(31, 41, 55, 0.34);
+          font-size: 2rem;
+          font-weight: 800;
+          text-transform: uppercase;
+        }
+
+        .featured-card__image img {
+          display: block;
+          width: 100%;
+          height: 190px;
+          object-fit: cover;
         }
 
         .featured-card__body {
           padding: 20px;
         }
 
-        .featured-card__tone {
-          display: inline-flex;
-          margin-bottom: 14px;
-          padding: 7px 10px;
-          border: 1px solid rgba(201, 162, 39, 0.34);
-          border-radius: 999px;
-          color: #1f2937;
-          background: rgba(201, 162, 39, 0.12);
-          font-size: 0.82rem;
-          font-weight: 700;
+        .featured-card__meta {
+          display: flex;
+          align-items: center;
+          justify-content: flex-start;
+          gap: 12px;
+          min-height: 22px;
+          margin-bottom: 10px;
         }
 
         .featured-card h3 {
@@ -149,9 +334,20 @@ export default function HomePage() {
           font-size: 1.2rem;
         }
 
+        .featured-card__type {
+          margin: 5px 0 0;
+          color: #6b7280;
+          font-size: 0.92rem;
+          font-weight: 650;
+        }
+
         .featured-card p {
           margin: 10px 0 0;
           color: #4b5563;
+          display: -webkit-box;
+          overflow: hidden;
+          -webkit-box-orient: vertical;
+          -webkit-line-clamp: 2;
         }
 
         .home-benefits {
@@ -178,7 +374,6 @@ export default function HomePage() {
         }
 
         @media (max-width: 980px) {
-          .featured-hotels,
           .home-benefits {
             grid-template-columns: repeat(2, minmax(0, 1fr));
           }
@@ -198,9 +393,12 @@ export default function HomePage() {
             flex-direction: column;
           }
 
-          .featured-hotels,
           .home-benefits {
             grid-template-columns: 1fr;
+          }
+
+          .featured-hotels {
+            grid-auto-columns: minmax(260px, 82vw);
           }
         }
       `}</style>
@@ -228,8 +426,8 @@ export default function HomePage() {
             <p className="eyebrow">Featured stays</p>
             <h2 id="featured-hotels-title">Hotels to inspire the first search</h2>
             <p className="home-section__copy">
-              Frontend-only placeholder cards. Real featured hotels will need
-              backend verification before connecting data.
+              Real active hotels from the backend, ready to open for details and
+              room selection.
             </p>
           </div>
           <Link to="/search" className="button button--secondary">
@@ -237,19 +435,34 @@ export default function HomePage() {
           </Link>
         </div>
 
-        <div className="featured-hotels">
-          {featuredHotels.map((hotel) => (
-            <article className="featured-card" key={hotel.name}>
-              <div className="featured-card__image" aria-hidden="true" />
-              <div className="featured-card__body">
-                <span className="featured-card__tone">{hotel.tone}</span>
-                <h3>{hotel.name}</h3>
-                <p>{hotel.location}</p>
-                <p>{hotel.detail}</p>
-              </div>
-            </article>
-          ))}
-        </div>
+        {featuredHotelsQuery.isLoading ? (
+          <LoadingState message="Loading featured hotels from the backend." />
+        ) : null}
+
+        {featuredHotelsQuery.isError ? (
+          <ErrorState
+            message="We could not load featured hotels from the backend."
+            onRetry={featuredHotelsQuery.refetch}
+          />
+        ) : null}
+
+        {featuredHotelsQuery.isSuccess && featuredHotels.length === 0 ? (
+          <EmptyState
+            title="No featured hotels yet"
+            message="No active hotels were returned by the backend."
+          />
+        ) : null}
+
+        {featuredHotelsQuery.isSuccess && featuredHotels.length > 0 ? (
+          <div className="featured-hotels">
+            {featuredHotels.map((hotel, index) => (
+              <FeaturedHotelCard
+                hotel={hotel}
+                key={hotel.id ?? hotel.hotelId ?? `${hotel.name}-${index}`}
+              />
+            ))}
+          </div>
+        ) : null}
       </section>
 
       <section className="home-section" aria-labelledby="why-book-title">
