@@ -65,6 +65,14 @@ const availabilityConfig = {
 
 /* ─── Component ───────────────────────────────────────────────────────────── */
 
+function getCheckoutAvailabilityLabel(status) {
+  if (status === AVAILABILITY.AVAILABLE) return "✓ Available";
+  if (status === AVAILABILITY.UNAVAILABLE) return "✕ Not available";
+  if (status === AVAILABILITY.CHECKING) return "Checking availability...";
+  if (status === AVAILABILITY.ERROR) return "Availability error";
+  return "Availability pending";
+}
+
 export default function BookingCheckoutPage() {
   const { hotelId, roomId } = useParams();
   const [searchParams] = useSearchParams();
@@ -99,13 +107,13 @@ export default function BookingCheckoutPage() {
   const room = findRoom(roomsQuery.data, roomId);
   const cancellationPolicyId = getCancellationPolicyId(room);
 
-  /* Auto-check availability when page loads with dates */
+  /* Auto-check availability when stay dates or room count change */
   useEffect(() => {
     if (checkIn && checkOut && checkIn < checkOut) {
       runAvailabilityCheck(checkIn, checkOut, roomCount);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // only on mount
+  }, [checkIn, checkOut, roomCount, hotelId, roomId]);
 
   /* Reset availability when key values change */
   function handleFormChange(field, value) {
@@ -231,11 +239,6 @@ export default function BookingCheckoutPage() {
   const isDataError = (hotelQuery.isError && !hotel) || roomsQuery.isError;
 
   const avail = availabilityConfig[availabilityStatus] ?? availabilityConfig.unchecked;
-  const canCheckAvailability =
-    Boolean(checkIn) &&
-    Boolean(checkOut) &&
-    checkIn < checkOut &&
-    availabilityStatus !== AVAILABILITY.CHECKING;
 
   return (
     <main className="public-page checkout-page">
@@ -307,7 +310,7 @@ export default function BookingCheckoutPage() {
                   <h3 className="checkout-section__title">Availability</h3>
 
                   <div className={`checkout-availability ${avail.className}`}>
-                    <span>{avail.label}</span>
+                    <span>{getCheckoutAvailabilityLabel(availabilityStatus)}</span>
                   </div>
 
                   {errors.availability && (
@@ -316,16 +319,13 @@ export default function BookingCheckoutPage() {
                     </p>
                   )}
 
-                  <button
-                    type="button"
-                    className="button button--secondary checkout-check-btn"
-                    disabled={!canCheckAvailability}
-                    onClick={() => runAvailabilityCheck()}
-                  >
+                  {false ? (
+                    <span className="checkout-availability__auto-note">
                     {availabilityStatus === AVAILABILITY.CHECKING
                       ? "Checking…"
                       : "Check availability"}
-                  </button>
+                    </span>
+                  ) : null}
                 </div>
 
                 {/* Special requests */}

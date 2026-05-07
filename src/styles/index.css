@@ -6259,35 +6259,29 @@ body.modal-open {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 14px;
-  border-radius: 6px;
+  padding: 0;
   font-size: 0.88rem;
   font-weight: 700;
   margin-bottom: 12px;
 }
 
 .checkout-availability--unchecked {
-  background: #f3f4f6;
   color: #4b5563;
 }
 
 .checkout-availability--checking {
-  background: #fef3c7;
   color: #92400e;
 }
 
 .checkout-availability--available {
-  background: #d1fae5;
   color: #065f46;
 }
 
 .checkout-availability--unavailable {
-  background: #fee2e2;
   color: #991b1b;
 }
 
 .checkout-availability--error {
-  background: #fce7f3;
   color: #9d174d;
 }
 
