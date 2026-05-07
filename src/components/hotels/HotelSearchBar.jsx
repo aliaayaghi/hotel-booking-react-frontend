@@ -154,8 +154,7 @@ function getCitySuggestion(item) {
     return null;
   }
 
-  const city =
-    item.city ?? item.cityName ?? item.name ?? item.location?.city;
+  const city = item.city ?? item.cityName ?? item.location?.city;
 
   if (!city) {
     return null;
@@ -187,6 +186,15 @@ function normalizeSuggestions(response) {
       return true;
     })
     .slice(0, 6);
+}
+
+function getSuggestionErrorMessage(error) {
+  return (
+    error?.response?.data?.message ??
+    error?.response?.data?.error ??
+    error?.message ??
+    "City suggestions are unavailable."
+  );
 }
 
 function AgeDropdown({ label, onChange, value }) {
@@ -578,6 +586,8 @@ export default function HotelSearchBar({ compact = false }) {
   const [searchParams] = useSearchParams();
   const [suggestions, setSuggestions] = useState([]);
   const [areSuggestionsOpen, setAreSuggestionsOpen] = useState(false);
+  const [suggestionStatus, setSuggestionStatus] = useState("idle");
+  const [suggestionError, setSuggestionError] = useState("");
   const [search, setSearch] = useState(() => getSearchFromParams(searchParams));
   const [formErrors, setFormErrors] = useState([]);
 
@@ -602,6 +612,8 @@ export default function HotelSearchBar({ compact = false }) {
   useEffect(() => {
     if (search.city.trim().length < 1) {
       setSuggestions([]);
+      setSuggestionStatus("idle");
+      setSuggestionError("");
       return;
     }
 
@@ -612,13 +624,24 @@ export default function HotelSearchBar({ compact = false }) {
 
     const controller = new AbortController();
 
+    setSuggestionStatus("loading");
+    setSuggestionError("");
+
     getHotelCitySuggestions(search.city.trim(), { signal: controller.signal })
       .then((response) => {
         setSuggestions(normalizeSuggestions(response));
+        setSuggestionStatus("success");
         setAreSuggestionsOpen(true);
       })
-      .catch(() => {
+      .catch((error) => {
+        if (error.name === "CanceledError" || error.code === "ERR_CANCELED") {
+          return;
+        }
+
         setSuggestions([]);
+        setSuggestionStatus("error");
+        setSuggestionError(getSuggestionErrorMessage(error));
+        setAreSuggestionsOpen(true);
       });
 
     return () => controller.abort();
@@ -642,6 +665,8 @@ export default function HotelSearchBar({ compact = false }) {
     shouldSkipSuggestionsRef.current = true;
     handleSearchChange({ city: suggestion.city });
     setSuggestions([]);
+    setSuggestionStatus("idle");
+    setSuggestionError("");
     setAreSuggestionsOpen(false);
   }
 
@@ -712,6 +737,30 @@ export default function HotelSearchBar({ compact = false }) {
                   {suggestion.label}
                 </button>
               ))}
+            </div>
+          ) : null}
+
+          {areSuggestionsOpen &&
+          search.city.trim().length > 0 &&
+          suggestions.length === 0 ? (
+            <div className="hotel-search__suggestions" role="status">
+              {suggestionStatus === "loading" ? (
+                <span className="hotel-search__suggestion-message">
+                  Loading cities...
+                </span>
+              ) : null}
+
+              {suggestionStatus === "error" ? (
+                <span className="hotel-search__suggestion-message hotel-search__suggestion-message--error">
+                  {suggestionError}
+                </span>
+              ) : null}
+
+              {suggestionStatus === "success" ? (
+                <span className="hotel-search__suggestion-message">
+                  No cities with hotels found.
+                </span>
+              ) : null}
             </div>
           ) : null}
         </div>

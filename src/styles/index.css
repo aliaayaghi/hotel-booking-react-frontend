@@ -305,6 +305,15 @@ a {
   background: #f8f6f1;
 }
 
+.hotel-search__suggestion-message {
+  color: #6b7280;
+  padding: 9px 10px;
+}
+
+.hotel-search__suggestion-message--error {
+  color: #991b1b;
+}
+
 .hotel-search__calendar-panel {
   left: 0;
   display: grid;
