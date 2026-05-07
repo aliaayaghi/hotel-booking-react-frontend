@@ -701,7 +701,7 @@ a {
 .filter-sidebar {
   align-self: start;
   position: sticky;
-  top: 88px;
+  top: 80px;
   overflow: visible;
   padding: 18px;
 }
@@ -891,8 +891,8 @@ a {
 
 .hotel-card:hover {
   border-color: rgba(201, 162, 39, 0.45);
-  box-shadow: 0 20px 55px rgba(31, 41, 55, 0.12);
-  transform: translateY(-1px);
+  box-shadow: 0 24px 58px rgba(31, 41, 55, 0.15);
+  transform: translateY(-2px) scale(1.01);
 }
 
 .hotel-card__media {
@@ -1966,6 +1966,25 @@ a {
   border-radius: 8px;
   background: #ffffff;
   box-shadow: 0 8px 24px rgba(31, 41, 55, 0.06);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.room-card--clickable {
+  cursor: pointer;
+}
+
+.room-card--clickable:hover {
+  border-color: rgba(201, 162, 39, 0.38);
+  box-shadow: 0 14px 34px rgba(31, 41, 55, 0.13);
+  transform: translateY(-2px) scale(1.01);
+}
+
+.room-card--clickable:focus-visible {
+  outline: 3px solid rgba(201, 162, 39, 0.28);
+  outline-offset: 3px;
 }
 
 .room-card__media {

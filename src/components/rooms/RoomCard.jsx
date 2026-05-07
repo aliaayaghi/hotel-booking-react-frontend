@@ -165,8 +165,25 @@ export default function RoomCard({
     resolvedAvailabilityStatus === "needs-dates" ||
     resolvedAvailabilityStatus === "checking";
 
+  function handleCardClick() {
+    onMoreDetails?.(room);
+  }
+
+  function handleCardKeyDown(event) {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      handleCardClick();
+    }
+  }
+
   return (
-    <article className="room-card">
+    <article
+      className="room-card room-card--clickable"
+      role="button"
+      tabIndex={0}
+      onClick={handleCardClick}
+      onKeyDown={handleCardKeyDown}
+    >
       <div className="room-card__media">
         {image ? (
           <img src={image} alt={roomName} />
@@ -232,14 +249,11 @@ export default function RoomCard({
           </span>
         </div>
 
-        <div className="room-card__actions">
-          <button
-            className="button button--secondary"
-            type="button"
-            onClick={() => onMoreDetails?.(room)}
-          >
-            More details
-          </button>
+        <div
+          className="room-card__actions"
+          onClick={(event) => event.stopPropagation()}
+          onKeyDown={(event) => event.stopPropagation()}
+        >
           <button
             className="button button--secondary"
             disabled={checkDisabled}
