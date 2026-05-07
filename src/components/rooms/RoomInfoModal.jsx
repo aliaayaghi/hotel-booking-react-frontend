@@ -13,7 +13,7 @@ function toArray(value) {
 }
 
 function compact(values) {
-  return values.filter((value) => value !== undefined && value !== null && value !== "");
+  return values.filter((v) => v !== undefined && v !== null && v !== "");
 }
 
 function getRoomName(room) {
@@ -99,48 +99,55 @@ function formatUsdPrice(price) {
   return String(price).trim();
 }
 
-function getItemName(item) {
-  if (typeof item === "string") {
-    return item;
-  }
+/* ── Amenity helpers ── */
 
-  return item?.name ?? item?.amenityName ?? item?.featureName ?? item?.title ?? item?.label ?? "";
+function getAmenityName(a) {
+  if (typeof a === "string") return a;
+  return a?.name ?? a?.amenityName ?? a?.featureName ?? a?.title ?? a?.label ?? "";
+}
+
+function getAmenityCategory(a) {
+  if (typeof a === "string") return "";
+  return a?.category ?? "";
 }
 
 function getAmenities(room) {
-  return toArray(room?.amenities ?? room?.roomAmenities)
-    .map(getItemName)
-    .filter(Boolean);
+  return toArray(room?.amenities ?? room?.roomAmenities).filter((a) =>
+    Boolean(getAmenityName(a))
+  );
 }
 
-function getAccessibilityFeatures(room) {
-  return toArray(
-    room?.accessibilityFeatures ??
-      room?.accessibility ??
-      room?.roomAccessibility ??
-      room?.roomAccessibilityFeatures,
-  )
-    .map(getItemName)
-    .filter(Boolean);
+/* ── Accessibility helpers ── */
+
+function getAccessibilityFeature(a) {
+  if (typeof a === "string") return a;
+  return a?.feature ?? a?.name ?? "";
 }
+
+function getAccessibilityAvailable(a) {
+  if (typeof a === "string") return true;
+  const val = a?.isAvailable ?? a?.available;
+  return val === undefined || val === null ? true : Boolean(val);
+}
+
+function getAccessibilities(room) {
+  return toArray(
+    room?.accessibilities ??
+      room?.accessibilityFeatures ??
+      room?.accessibility ??
+      room?.roomAccessibility
+  ).filter((a) => Boolean(getAccessibilityFeature(a)));
+}
+
+/* ── Cancellation policy helpers ── */
 
 function getCancellationPolicies(room) {
-  const policies = toArray(room?.cancellationPolicies);
-  const singlePolicy = room?.cancellationPolicy ?? room?.cancellationPolicyPreview;
-  const policyValues = policies.length ? policies : compact([singlePolicy]);
-
-  return compact([
-    ...policyValues.map((policy) => {
-      if (typeof policy === "string") {
-        return policy;
-      }
-
-      return policy?.name ?? policy?.title ?? policy?.description ?? "";
-    }),
-    room?.cancellationPolicyName,
-    room?.cancellationPolicyDescription,
-  ]);
+  return toArray(room?.cancellationPolicies).filter(
+    (p) => p && (p?.tierName || p?.description || p?.refundPercentage !== undefined)
+  );
 }
+
+/* ── Shared sub-components ── */
 
 function InfoFact({ label, value }) {
   if (value === undefined || value === null || value === "") {
@@ -155,19 +162,198 @@ function InfoFact({ label, value }) {
   );
 }
 
-function FeatureList({ emptyMessage, items }) {
-  if (!items.length) {
-    return <p className="room-info-modal__empty">{emptyMessage}</p>;
+/* ── Section: Room amenities ── */
+
+function AmenitiesSection({ room }) {
+  const amenities = getAmenities(room);
+
+  if (!amenities.length) {
+    return (
+      <p className="room-info-modal__empty">
+        Room amenity details are not available yet.
+      </p>
+    );
+  }
+
+  // Group by category
+  const groups = {};
+  amenities.forEach((a) => {
+    const name = getAmenityName(a);
+    const cat = getAmenityCategory(a);
+    const key = cat || "__none__";
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(name);
+  });
+
+  const cats = Object.keys(groups);
+  const hasCategories = cats.some((c) => c !== "__none__");
+
+  if (!hasCategories) {
+    return (
+      <ul className="room-info-modal__amenity-list">
+        {groups["__none__"].map((name) => (
+          <li key={name}>{name}</li>
+        ))}
+      </ul>
+    );
   }
 
   return (
-    <ul className="room-info-modal__chips">
-      {items.map((item) => (
-        <li key={item}>{item}</li>
+    <div className="room-info-modal__amenity-groups">
+      {cats.map((cat) => (
+        <div key={cat} className="room-info-modal__amenity-group">
+          {cat !== "__none__" && (
+            <p className="room-info-modal__amenity-cat">{cat}</p>
+          )}
+          <ul className="room-info-modal__amenity-list">
+            {groups[cat].map((name) => (
+              <li key={name}>{name}</li>
+            ))}
+          </ul>
+        </div>
       ))}
+    </div>
+  );
+}
+
+/* ── Section: Accessibility ── */
+
+function AccessibilitiesSection({ room }) {
+  const items = getAccessibilities(room);
+
+  if (!items.length) {
+    return (
+      <p className="room-info-modal__empty">
+        Accessibility details are not available yet.
+      </p>
+    );
+  }
+
+  return (
+    <ul className="room-info-modal__access-list">
+      {items.map((a, i) => {
+        const feature = getAccessibilityFeature(a);
+        const available = getAccessibilityAvailable(a);
+
+        return (
+          <li
+            key={a?.id ?? feature ?? i}
+            className={
+              available
+                ? "room-info-modal__access-item"
+                : "room-info-modal__access-item room-info-modal__access-item--unavailable"
+            }
+          >
+            <span className="room-info-modal__access-icon" aria-hidden="true">
+              {available ? "✓" : "×"}
+            </span>
+            {feature}
+          </li>
+        );
+      })}
     </ul>
   );
 }
+
+/* ── Section: Cancellation policy ── */
+
+function CancellationPoliciesSection({ room }) {
+  const policies = getCancellationPolicies(room);
+
+  if (!policies.length) {
+    return (
+      <p className="room-info-modal__empty">
+        Cancellation policy details are not available yet.
+      </p>
+    );
+  }
+
+  return (
+    <div className="room-info-modal__policy-list">
+      {policies.map((policy, i) => {
+        const tierName = policy?.tierName;
+        const deadlineHours = policy?.deadlineHours;
+        const refundPct = policy?.refundPercentage;
+        const description = policy?.description;
+        const isDefault = policy?.isDefault;
+
+        // Only show refund row if refundPercentage is present in the data
+        const hasRefundPct = refundPct !== undefined && refundPct !== null;
+
+        // Support extra fields the task listed as possible but not in the confirmed schema
+        const refundable = policy?.refundable ?? policy?.isRefundable;
+        const refundAmount = policy?.refundAmount;
+        const refundPolicy = policy?.refundPolicy;
+        const refundDescription = policy?.refundDescription;
+
+        const hasRefundable =
+          !hasRefundPct && refundable !== undefined && refundable !== null;
+        const hasRefundAmount =
+          refundAmount !== undefined && refundAmount !== null && refundAmount !== "";
+
+        return (
+          <div key={policy?.id ?? i} className="room-info-modal__policy-item">
+            <div className="room-info-modal__policy-header">
+              {tierName ? (
+                <span className="room-info-modal__policy-tier">{tierName}</span>
+              ) : null}
+              {isDefault ? (
+                <span className="room-info-modal__policy-badge">Default</span>
+              ) : null}
+            </div>
+
+            {deadlineHours !== undefined && deadlineHours !== null ? (
+              <p className="room-info-modal__policy-row">
+                <span>Deadline</span>
+                <span>{deadlineHours} hours before check-in</span>
+              </p>
+            ) : null}
+
+            {hasRefundPct ? (
+              <p className="room-info-modal__policy-row">
+                <span>Refund</span>
+                <span>
+                  {refundPct === 0 ? "Non-refundable" : `${refundPct}%`}
+                </span>
+              </p>
+            ) : null}
+
+            {hasRefundable ? (
+              <p className="room-info-modal__policy-row">
+                <span>Refundable</span>
+                <span>{refundable ? "Yes" : "No"}</span>
+              </p>
+            ) : null}
+
+            {hasRefundAmount ? (
+              <p className="room-info-modal__policy-row">
+                <span>Refund amount</span>
+                <span>{formatUsdPrice(refundAmount) || refundAmount}</span>
+              </p>
+            ) : null}
+
+            {refundPolicy ? (
+              <p className="room-info-modal__policy-row">
+                <span>Refund policy</span>
+                <span>{refundPolicy}</span>
+              </p>
+            ) : null}
+
+            {refundDescription ? (
+              <p className="room-info-modal__policy-desc">{refundDescription}</p>
+            ) : null}
+
+            {description ? (
+              <p className="room-info-modal__policy-desc">{description}</p>
+            ) : null}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ── Main modal ── */
 
 export default function RoomInfoModal({ onClose, room }) {
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
@@ -179,9 +365,6 @@ export default function RoomInfoModal({ onClose, room }) {
   const selectedPhoto = photos[selectedPhotoIndex];
   const selectedPhotoUrl = getPhotoUrl(selectedPhoto);
   const hasMultiplePhotos = photos.length > 1;
-  const amenities = getAmenities(room);
-  const accessibilityFeatures = getAccessibilityFeatures(room);
-  const cancellationPolicies = getCancellationPolicies(room);
   const priceLabel = formatUsdPrice(room?.price ?? room?.basePrice);
 
   function showPreviousPhoto() {
@@ -288,7 +471,10 @@ export default function RoomInfoModal({ onClose, room }) {
                 </div>
 
                 {hasMultiplePhotos ? (
-                  <div className="room-info-modal__thumbnails" aria-label="Room photo thumbnails">
+                  <div
+                    className="room-info-modal__thumbnails"
+                    aria-label="Room photo thumbnails"
+                  >
                     {photos.map((photo, index) => {
                       const photoUrl = getPhotoUrl(photo);
 
@@ -323,7 +509,10 @@ export default function RoomInfoModal({ onClose, room }) {
             )}
           </section>
 
-          <section className="room-info-modal__summary" aria-label={`${roomName} details`}>
+          <section
+            className="room-info-modal__summary"
+            aria-label={`${roomName} details`}
+          >
             <div className="room-info-modal__price">
               {priceLabel ? (
                 <>
@@ -339,7 +528,10 @@ export default function RoomInfoModal({ onClose, room }) {
               <InfoFact label="Bed type" value={room?.bedType} />
               <InfoFact label="Max adults" value={room?.maxAdults} />
               <InfoFact label="Max children" value={room?.maxChildren} />
-              <InfoFact label="Room size" value={room?.sizeSqm ? `${room.sizeSqm} sqm` : ""} />
+              <InfoFact
+                label="Room size"
+                value={room?.sizeSqm ? `${room.sizeSqm} sqm` : ""}
+              />
               <InfoFact label="Floor" value={room?.floor} />
               <InfoFact label="View" value={room?.view} />
             </div>
@@ -352,34 +544,18 @@ export default function RoomInfoModal({ onClose, room }) {
             ) : null}
 
             <div className="room-info-modal__block">
-              <h3>Amenities</h3>
-              <FeatureList
-                emptyMessage="Room amenities are not available yet."
-                items={amenities}
-              />
+              <h3>Room amenities</h3>
+              <AmenitiesSection room={room} />
             </div>
 
             <div className="room-info-modal__block">
               <h3>Accessibility</h3>
-              <FeatureList
-                emptyMessage="Room accessibility details are not available yet."
-                items={accessibilityFeatures}
-              />
+              <AccessibilitiesSection room={room} />
             </div>
 
             <div className="room-info-modal__block">
               <h3>Cancellation policy</h3>
-              {cancellationPolicies.length ? (
-                <ul className="room-info-modal__policies">
-                  {cancellationPolicies.map((policy) => (
-                    <li key={policy}>{policy}</li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="room-info-modal__empty">
-                  Cancellation policy details are not available yet
-                </p>
-              )}
+              <CancellationPoliciesSection room={room} />
             </div>
           </section>
         </div>

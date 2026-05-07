@@ -11,7 +11,7 @@ const publicLinks = [
 ];
 
 const customerMenuItems = [
-  { to: "/my-bookings", label: "My Bookings" },
+  { to: "/customer/bookings", label: "My Bookings" },
   { to: "/saved-hotels", label: "Saved Hotels" },
   { to: "/account/settings", label: "Account Settings" },
   { to: "/payment-methods", label: "Payment Methods" },

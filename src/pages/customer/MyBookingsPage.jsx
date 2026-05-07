@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 
-import BookingDetailsModal from "../../components/dashboard/BookingDetailsModal.jsx";
 import StatusBadge from "../../components/dashboard/StatusBadge.jsx";
 import ErrorState from "../../components/feedback/ErrorState.jsx";
 import LoadingState from "../../components/feedback/LoadingState.jsx";
@@ -31,12 +30,14 @@ function getBookingList(data) {
   return [];
 }
 
+const CANCELLABLE_STATUSES = new Set(["PENDING", "CONFIRMED"]);
+
 function CancelButton({ bookingId, status }) {
   const { mutate: cancel, isPending } = useCancelBooking(bookingId);
-  if (status !== "PENDING" && status !== "CONFIRMED") return null;
+  if (!CANCELLABLE_STATUSES.has(status)) return null;
 
   function handleCancel() {
-    if (window.confirm("Are you sure you want to cancel this booking?")) {
+    if (window.confirm("Cancel this booking? This action cannot be undone.")) {
       cancel();
     }
   }
@@ -53,35 +54,38 @@ function CancelButton({ bookingId, status }) {
   );
 }
 
-function BookingCard({ booking, onViewDetails }) {
-  const hotel = booking?.hotel ?? booking?.room?.hotel ?? {};
-  const room  = booking?.room ?? {};
-  const photoUrl =
-    hotel?.photos?.[0]?.url ?? hotel?.coverPhoto ?? hotel?.photoUrl ?? null;
+function BookingCard({ booking }) {
+  /* BookingResponseDTO: room is RoomSummary with roomName / roomType */
+  const room = booking?.room ?? {};
+  const roomLabel = room.roomName ?? room.roomType ?? null;
+
+  /* Payment summary embedded in booking response */
+  const payment = booking?.payment ?? null;
 
   return (
     <article className="booking-card">
       <div className="booking-card__media">
-        {photoUrl ? (
-          <img src={photoUrl} alt={hotel?.name ?? "Hotel"} />
-        ) : (
-          <div className="booking-card__media-placeholder">
-            <span>🏨</span>
-          </div>
-        )}
+        <div className="booking-card__media-placeholder">
+          <span>🏨</span>
+        </div>
       </div>
 
       <div className="booking-card__body">
         <div className="booking-card__top">
           <div>
             <h2 className="booking-card__hotel-name">
-              {hotel?.name ?? booking?.hotelName ?? "Hotel"}
+              {roomLabel ?? "Booking"}
             </h2>
-            {(room?.name || room?.type) && (
-              <p className="booking-card__room-type">{room?.name ?? room?.type}</p>
+            {room.roomType && room.roomName && (
+              <p className="booking-card__room-type">{room.roomType}</p>
             )}
           </div>
-          <StatusBadge status={booking?.status} type="booking" />
+          <div className="booking-card__badges">
+            <StatusBadge status={booking?.status} type="booking" />
+            {payment?.status && (
+              <StatusBadge status={payment.status} type="payment" />
+            )}
+          </div>
         </div>
 
         <dl className="booking-card__details">
@@ -103,19 +107,18 @@ function BookingCard({ booking, onViewDetails }) {
           <div>
             <dt>Total</dt>
             <dd className="booking-card__price">
-              {formatPrice(booking?.totalPrice ?? booking?.totalAmount)}
+              {formatPrice(booking?.totalPrice)}
             </dd>
           </div>
         </dl>
 
         <div className="booking-card__actions">
-          <button
-            type="button"
+          <Link
+            to={`/customer/bookings/${booking?.id}`}
             className="button button--secondary booking-card__details-btn"
-            onClick={() => onViewDetails(booking)}
           >
             View details
-          </button>
+          </Link>
           <CancelButton bookingId={booking?.id} status={booking?.status} />
         </div>
       </div>
@@ -125,7 +128,6 @@ function BookingCard({ booking, onViewDetails }) {
 
 export default function MyBookingsPage() {
   const { data, isLoading, isError, refetch } = useMyBookings();
-  const [selectedBooking, setSelectedBooking] = useState(null);
   const bookings = getBookingList(data);
 
   if (isLoading) return <LoadingState message="Loading your bookings…" />;
@@ -158,17 +160,9 @@ export default function MyBookingsPage() {
             <BookingCard
               key={booking.id ?? booking.bookingId}
               booking={booking}
-              onViewDetails={setSelectedBooking}
             />
           ))}
         </div>
-      )}
-
-      {selectedBooking && (
-        <BookingDetailsModal
-          booking={selectedBooking}
-          onClose={() => setSelectedBooking(null)}
-        />
       )}
     </main>
   );

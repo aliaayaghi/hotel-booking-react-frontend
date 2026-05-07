@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import EmptyState from "../feedback/EmptyState.jsx";
 import ErrorState from "../feedback/ErrorState.jsx";
@@ -50,6 +50,7 @@ function SearchSummaryField({ label, value }) {
 
 export default function ChooseRoomSection({ hotelId, roomsQuery, searchValues }) {
   const [, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [availabilityByRoom, setAvailabilityByRoom] = useState({});
   const rooms = getRooms(roomsQuery.data);
@@ -126,6 +127,20 @@ export default function ChooseRoomSection({ hotelId, roomsQuery, searchValues })
       },
       { replace: true },
     );
+  }
+
+  function handleBook(room) {
+    const roomId = getRoomId(room);
+    if (!roomId) return;
+    const params = new URLSearchParams();
+    if (searchValues.checkIn) params.set("checkIn", searchValues.checkIn);
+    if (searchValues.checkOut) params.set("checkOut", searchValues.checkOut);
+    if (searchValues.adults) params.set("adults", searchValues.adults);
+    if (searchValues.children) params.set("children", searchValues.children);
+    if (searchValues.childrenAges) params.set("childrenAges", searchValues.childrenAges);
+    if (searchValues.rooms) params.set("rooms", searchValues.rooms);
+    if (searchValues.petsAllowed) params.set("petsAllowed", "true");
+    navigate(`/booking/${hotelId}/${roomId}?${params.toString()}`);
   }
 
   function handleCheckAvailability(room) {
@@ -225,6 +240,7 @@ export default function ChooseRoomSection({ hotelId, roomsQuery, searchValues })
                 availabilityMutation.isPending &&
                 availabilityMutation.variables?.roomId === getRoomId(room)
               }
+              onBook={handleBook}
               onMoreDetails={setSelectedRoom}
               onCheckAvailability={handleCheckAvailability}
               room={room}

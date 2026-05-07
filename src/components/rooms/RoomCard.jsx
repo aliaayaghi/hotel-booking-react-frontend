@@ -74,20 +74,41 @@ function getAmenities(room) {
 }
 
 function getCancellationPolicy(room) {
-  const policy = room?.cancellationPolicy ?? room?.cancellationPolicyPreview;
+  // Try single-policy preview fields first
+  const singlePolicy = room?.cancellationPolicy ?? room?.cancellationPolicyPreview;
 
-  if (typeof policy === "string") {
-    return policy;
+  if (typeof singlePolicy === "string") {
+    return singlePolicy;
   }
 
-  return (
-    policy?.name ??
-    policy?.title ??
-    policy?.description ??
-    room?.cancellationPolicyName ??
-    room?.cancellationPolicyDescription ??
-    ""
-  );
+  if (singlePolicy) {
+    return (
+      singlePolicy?.tierName ??
+      singlePolicy?.name ??
+      singlePolicy?.title ??
+      singlePolicy?.description ??
+      ""
+    );
+  }
+
+  // Try cancellationPolicies array — prefer the default policy
+  const policies = toArray(room?.cancellationPolicies);
+  const defaultPolicy =
+    policies.find((p) => p?.isDefault) ?? policies[0];
+
+  if (defaultPolicy) {
+    if (typeof defaultPolicy === "string") return defaultPolicy;
+    const tier = defaultPolicy?.tierName ?? "";
+    const refundPct = defaultPolicy?.refundPercentage;
+    if (tier && refundPct !== undefined) {
+      return refundPct === 0
+        ? `${tier} — Non-refundable`
+        : `${tier} — ${refundPct}% refund`;
+    }
+    return tier || defaultPolicy?.description || "";
+  }
+
+  return room?.cancellationPolicyName ?? room?.cancellationPolicyDescription ?? "";
 }
 
 function RoomFact({ label, value }) {
@@ -119,6 +140,7 @@ function getAvailabilityClassName(status) {
 export default function RoomCard({
   availabilityStatus = "needs-dates",
   isCheckingAvailability = false,
+  onBook,
   onCheckAvailability,
   onMoreDetails,
   room,
@@ -188,9 +210,14 @@ export default function RoomCard({
 
         {amenities.length ? (
           <div className="room-card__amenities">
-            {amenities.slice(0, 4).map((amenity) => (
+            {amenities.slice(0, 3).map((amenity) => (
               <span key={amenity}>{amenity}</span>
             ))}
+            {amenities.length > 3 ? (
+              <span className="room-card__amenities-more">
+                +{amenities.length - 3} more
+              </span>
+            ) : null}
           </div>
         ) : null}
 
@@ -224,12 +251,9 @@ export default function RoomCard({
           <button
             className="button button--primary"
             disabled={selectDisabled}
-            title={
-              selectDisabled
-                ? "Check availability before continuing."
-                : "Booking flow will be added in a future task."
-            }
+            title={selectDisabled ? "Check availability before continuing." : undefined}
             type="button"
+            onClick={() => !selectDisabled && onBook?.(room)}
           >
             Select and continue
           </button>

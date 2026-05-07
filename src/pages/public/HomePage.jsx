@@ -209,7 +209,7 @@ export default function HomePage() {
         <div className="home-hero__inner">
           <div className="home-hero__content">
             <p className="home-hero__kicker">Find your stay</p>
-            <h1 id="home-title">Book a calmer hotel stay.</h1>
+            <h1 id="home-title">Book a calmer stay.</h1>
             <p className="home-hero__copy">
               Search by city, dates, guests, rooms, and pet-friendly stays in one
               clear place.

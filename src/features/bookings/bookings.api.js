@@ -1,5 +1,10 @@
 import { axiosClient } from "../../api/axiosClient.js";
 
+export async function createBooking(bookingData) {
+  const { data } = await axiosClient.post("/api/bookings", bookingData);
+  return data;
+}
+
 export async function getMyBookings() {
   const { data } = await axiosClient.get("/api/bookings");
   return data;

@@ -15,8 +15,14 @@ import RegisterPage from "../pages/public/RegisterPage.jsx";
 import SearchResultsPage from "../pages/public/SearchResultsPage.jsx";
 import ProfilePage from "../pages/profile/ProfilePage.jsx";
 
+// Booking flow pages
+import BookingCheckoutPage from "../pages/customer/BookingCheckoutPage.jsx";
+import PaymentPage from "../pages/booking/PaymentPage.jsx";
+import ConfirmationPage from "../pages/booking/ConfirmationPage.jsx";
+
 // Customer pages
 import MyBookingsPage from "../pages/customer/MyBookingsPage.jsx";
+import BookingDetailsPage from "../pages/customer/BookingDetailsPage.jsx";
 import SavedHotelsPage from "../pages/customer/SavedHotelsPage.jsx";
 import AccountSettingsPage from "../pages/customer/AccountSettingsPage.jsx";
 import PaymentMethodsPage from "../pages/customer/PaymentMethodsPage.jsx";
@@ -61,9 +67,21 @@ export const router = createBrowserRouter([
       /* Customer-only pages */
       {
         path: "my-bookings",
+        element: <Navigate to="/customer/bookings" replace />,
+      },
+      {
+        path: "customer/bookings",
         element: (
           <RoleRoute allowedRole={USER_ROLES.CUSTOMER}>
             <MyBookingsPage />
+          </RoleRoute>
+        ),
+      },
+      {
+        path: "customer/bookings/:bookingId",
+        element: (
+          <RoleRoute allowedRole={USER_ROLES.CUSTOMER}>
+            <BookingDetailsPage />
           </RoleRoute>
         ),
       },
@@ -92,7 +110,31 @@ export const router = createBrowserRouter([
         ),
       },
       { path: "help", element: <HelpPage /> },
-
+      /* Booking flow — customer only */
+      {
+        path: "booking/:hotelId/:roomId",
+        element: (
+          <RoleRoute allowedRole={USER_ROLES.CUSTOMER}>
+            <BookingCheckoutPage />
+          </RoleRoute>
+        ),
+      },
+      {
+        path: "booking/:bookingId/payment",
+        element: (
+          <RoleRoute allowedRole={USER_ROLES.CUSTOMER}>
+            <PaymentPage />
+          </RoleRoute>
+        ),
+      },
+      {
+        path: "booking/:bookingId/confirmation",
+        element: (
+          <RoleRoute allowedRole={USER_ROLES.CUSTOMER}>
+            <ConfirmationPage />
+          </RoleRoute>
+        ),
+      },
     ],
   },
 

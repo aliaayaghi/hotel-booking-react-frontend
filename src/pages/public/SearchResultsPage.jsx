@@ -106,9 +106,23 @@ export default function SearchResultsPage() {
   const totalPages = getTotalPages(hotelSearch.data);
   const currentPage = getCurrentPage(searchParams, hotelSearch.data);
 
+  const backendError = hotelSearch.isError
+    ? (hotelSearch.error?.response?.data?.message ??
+       hotelSearch.error?.response?.data?.error ??
+       hotelSearch.error?.message ??
+       "Search request failed.")
+    : null;
+
   return (
     <main className="public-page search-page">
       <HotelSearchBar compact />
+
+      {backendError && (
+        <div className="search-backend-error" role="alert">
+          <strong>Search error:</strong> {backendError}
+        </div>
+      )}
+
       <ResultCount searchParams={searchParams} totalResults={totalResults} />
 
       <div className="search-page__layout">
@@ -119,16 +133,7 @@ export default function SearchResultsPage() {
             <LoadingState message="Fetching hotels from the backend search endpoint." />
           ) : null}
 
-          {hotelSearch.isError ? (
-            <ErrorState
-              message={
-                hotelSearch.error?.response?.data?.message ??
-                hotelSearch.error?.message ??
-                "Search request failed."
-              }
-              onRetry={hotelSearch.refetch}
-            />
-          ) : null}
+          {hotelSearch.isError ? null : null}
 
           {hotelSearch.isSuccess && hotels.length === 0 ? <EmptyState /> : null}
 

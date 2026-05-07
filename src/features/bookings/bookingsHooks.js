@@ -5,11 +5,25 @@ import {
   cancelBooking,
   completeBooking,
   confirmBooking,
+  createBooking,
   getBookingById,
   getHotelBookings,
   getMyBookings,
   noShowBooking,
 } from "./bookings.api.js";
+
+export function useCreateBooking() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createBooking,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["bookings"] });
+    },
+    onError: (err) => {
+      toast.error(err?.response?.data?.message ?? "Could not create booking. Please try again.");
+    },
+  });
+}
 
 export function useMyBookings() {
   return useQuery({
