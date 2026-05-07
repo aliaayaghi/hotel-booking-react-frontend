@@ -39,6 +39,8 @@ function getRoomQuantity(searchValues) {
   return Number.isFinite(rooms) && rooms > 0 ? rooms : 1;
 }
 
+const BOOKING_NAVIGATION_DELAY_MS = 900;
+
 function SearchSummaryField({ label, value }) {
   return (
     <div className="choose-room-search__field">
@@ -131,20 +133,6 @@ export default function ChooseRoomSection({ hotelId, roomsQuery, searchValues })
 
   function handleBook(room) {
     const roomId = getRoomId(room);
-    if (!roomId) return;
-    const params = new URLSearchParams();
-    if (searchValues.checkIn) params.set("checkIn", searchValues.checkIn);
-    if (searchValues.checkOut) params.set("checkOut", searchValues.checkOut);
-    if (searchValues.adults) params.set("adults", searchValues.adults);
-    if (searchValues.children) params.set("children", searchValues.children);
-    if (searchValues.childrenAges) params.set("childrenAges", searchValues.childrenAges);
-    if (searchValues.rooms) params.set("rooms", searchValues.rooms);
-    if (searchValues.petsAllowed) params.set("petsAllowed", "true");
-    navigate(`/booking/${hotelId}/${roomId}?${params.toString()}`);
-  }
-
-  function handleCheckAvailability(room) {
-    const roomId = getRoomId(room);
 
     if (!datesSelected || !roomId) {
       return;
@@ -161,6 +149,38 @@ export default function ChooseRoomSection({ hotelId, roomsQuery, searchValues })
       roomId,
       roomQuantity,
       to: searchValues.checkOut,
+    }, {
+      onSuccess: (available, variables) => {
+        if (
+          variables.from !== searchValues.checkIn ||
+          variables.hotelId !== hotelId ||
+          variables.roomQuantity !== roomQuantity ||
+          variables.to !== searchValues.checkOut
+        ) {
+          return;
+        }
+
+        if (!available) {
+          return;
+        }
+
+        setAvailabilityByRoom((currentAvailability) => ({
+          ...currentAvailability,
+          [roomId]: "available",
+        }));
+
+        const params = new URLSearchParams();
+        if (searchValues.checkIn) params.set("checkIn", searchValues.checkIn);
+        if (searchValues.checkOut) params.set("checkOut", searchValues.checkOut);
+        if (searchValues.adults) params.set("adults", searchValues.adults);
+        if (searchValues.children) params.set("children", searchValues.children);
+        if (searchValues.childrenAges) params.set("childrenAges", searchValues.childrenAges);
+        if (searchValues.rooms) params.set("rooms", searchValues.rooms);
+        if (searchValues.petsAllowed) params.set("petsAllowed", "true");
+        window.setTimeout(() => {
+          navigate(`/booking/${hotelId}/${roomId}?${params.toString()}`);
+        }, BOOKING_NAVIGATION_DELAY_MS);
+      },
     });
   }
 
@@ -242,7 +262,6 @@ export default function ChooseRoomSection({ hotelId, roomsQuery, searchValues })
               }
               onBook={handleBook}
               onMoreDetails={setSelectedRoom}
-              onCheckAvailability={handleCheckAvailability}
               room={room}
             />
           ))}

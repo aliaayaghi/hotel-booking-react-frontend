@@ -125,11 +125,11 @@ function RoomFact({ label, value }) {
 }
 
 const availabilityLabels = {
-  available: "Available",
+  available: "✓ Available",
   checking: "Checking availability",
   error: "Error checking availability",
   "needs-dates": "Needs dates",
-  unavailable: "Not available",
+  unavailable: "✕ Not available",
   unchecked: "Check availability",
 };
 
@@ -137,11 +137,26 @@ function getAvailabilityClassName(status) {
   return `room-card__availability room-card__availability--${status}`;
 }
 
+function getAvailabilityLabel(status) {
+  if (status === "available" || status === "unchecked") {
+    return "Available";
+  }
+
+  if (status === "unavailable") {
+    return "Not available";
+  }
+
+  if (status === "error") {
+    return "Availability error";
+  }
+
+  return availabilityLabels[status] ?? "Available";
+}
+
 export default function RoomCard({
   availabilityStatus = "needs-dates",
   isCheckingAvailability = false,
   onBook,
-  onCheckAvailability,
   onMoreDetails,
   room,
 }) {
@@ -160,8 +175,7 @@ export default function RoomCard({
   const resolvedAvailabilityStatus = isCheckingAvailability
     ? "checking"
     : availabilityStatus;
-  const selectDisabled = resolvedAvailabilityStatus !== "available";
-  const checkDisabled =
+  const selectDisabled =
     resolvedAvailabilityStatus === "needs-dates" ||
     resolvedAvailabilityStatus === "checking";
 
@@ -244,8 +258,7 @@ export default function RoomCard({
 
         <div className="room-card__availability-row">
           <span className={getAvailabilityClassName(resolvedAvailabilityStatus)}>
-            {availabilityLabels[resolvedAvailabilityStatus] ??
-              "Check availability"}
+            {getAvailabilityLabel(resolvedAvailabilityStatus)}
           </span>
         </div>
 
@@ -255,21 +268,13 @@ export default function RoomCard({
           onKeyDown={(event) => event.stopPropagation()}
         >
           <button
-            className="button button--secondary"
-            disabled={checkDisabled}
-            type="button"
-            onClick={() => onCheckAvailability?.(room)}
-          >
-            Check availability
-          </button>
-          <button
             className="button button--primary"
             disabled={selectDisabled}
-            title={selectDisabled ? "Check availability before continuing." : undefined}
+            title={selectDisabled ? "Choose valid dates before continuing." : undefined}
             type="button"
             onClick={() => !selectDisabled && onBook?.(room)}
           >
-            Select and continue
+            {resolvedAvailabilityStatus === "checking" ? "Checking..." : "Book now"}
           </button>
         </div>
       </div>

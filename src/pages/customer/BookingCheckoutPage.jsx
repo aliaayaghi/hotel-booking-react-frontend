@@ -139,7 +139,7 @@ export default function BookingCheckoutPage() {
   }
 
   /* Validation */
-  function validate() {
+  function validate({ requireAvailability = true } = {}) {
     const errs = {};
     if (!hotelId) errs.general = "Hotel ID is missing.";
     if (!roomId) errs.general = "Room ID is missing.";
@@ -150,23 +150,15 @@ export default function BookingCheckoutPage() {
     if (!adults || adults < 1) errs.adults = "At least 1 adult is required.";
     if (!roomCount || roomCount < 1)
       errs.roomCount = "At least 1 room is required.";
-    if (availabilityStatus !== AVAILABILITY.AVAILABLE)
+    if (requireAvailability && availabilityStatus !== AVAILABILITY.AVAILABLE)
       errs.availability =
         availabilityStatus === AVAILABILITY.UNAVAILABLE
           ? "This room is not available for the selected dates."
-          : "Please check room availability before booking.";
+          : "Availability will be checked before booking.";
     return errs;
   }
 
-  function handleSubmit(e) {
-    e.preventDefault();
-    const errs = validate();
-    if (Object.keys(errs).length) {
-      setErrors(errs);
-      return;
-    }
-    setErrors({});
-
+  function submitBookingRequest() {
     submitBooking(
       {
         hotelId,
@@ -189,6 +181,46 @@ export default function BookingCheckoutPage() {
           if (bookingId) {
             navigate(`/booking/${bookingId}/payment`);
           }
+        },
+      },
+    );
+  }
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    const errs = validate({ requireAvailability: false });
+    if (Object.keys(errs).length) {
+      setErrors(errs);
+      return;
+    }
+    setErrors({});
+
+    if (availabilityStatus === AVAILABILITY.AVAILABLE) {
+      submitBookingRequest();
+      return;
+    }
+
+    setAvailabilityStatus(AVAILABILITY.CHECKING);
+    checkAvailability(
+      { from: checkIn, to: checkOut, hotelId, roomId, roomQuantity: roomCount },
+      {
+        onSuccess: (available) => {
+          if (available) {
+            setAvailabilityStatus(AVAILABILITY.AVAILABLE);
+            submitBookingRequest();
+            return;
+          }
+
+          setAvailabilityStatus(AVAILABILITY.UNAVAILABLE);
+          setErrors({
+            availability: "This room is not available for the selected dates.",
+          });
+        },
+        onError: () => {
+          setAvailabilityStatus(AVAILABILITY.ERROR);
+          setErrors({
+            availability: "Could not check availability. Please try again.",
+          });
         },
       },
     );
@@ -318,7 +350,7 @@ export default function BookingCheckoutPage() {
                   <button
                     type="submit"
                     className="button button--primary"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || availabilityStatus === AVAILABILITY.CHECKING}
                   >
                     {isSubmitting ? "Creating booking…" : "Book now"}
                   </button>

@@ -2128,33 +2128,24 @@ a {
   display: inline-flex;
   align-items: center;
   min-height: 28px;
-  border: 1px solid rgba(31, 41, 55, 0.12);
-  border-radius: 6px;
-  padding: 4px 8px;
-  background: #fdfcf9;
+  padding: 0;
   color: #4b5563;
   font-size: 0.82rem;
   font-weight: 800;
 }
 
 .room-card__availability--available {
-  border-color: rgba(75, 117, 81, 0.28);
-  background: rgba(75, 117, 81, 0.09);
   color: #2f5d37;
 }
 
 .room-card__availability--unavailable,
 .room-card__availability--error {
-  border-color: rgba(146, 64, 14, 0.22);
-  background: rgba(146, 64, 14, 0.08);
   color: #7c2d12;
 }
 
 .room-card__availability--checking,
 .room-card__availability--needs-dates,
 .room-card__availability--unchecked {
-  border-color: rgba(139, 115, 85, 0.22);
-  background: rgba(248, 246, 241, 0.82);
   color: #8b7355;
 }
 
@@ -2163,6 +2154,10 @@ a {
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 7px;
+}
+
+.checkout-check-btn {
+  display: none;
 }
 
 .hotel-details-page .button {
