@@ -64,11 +64,11 @@ function BookingCard({ booking }) {
 
   return (
     <article className="booking-card">
-      <div className="booking-card__media">
+      {false ? <div className="booking-card__media">
         <div className="booking-card__media-placeholder">
           <span>🏨</span>
         </div>
-      </div>
+      </div> : null}
 
       <div className="booking-card__body">
         <div className="booking-card__top">

@@ -11,37 +11,79 @@ import {
 } from "../../features/saved/savedHooks.js";
 
 function getHotelId(item) {
-  return item?.hotel?.id ?? item?.hotelId ?? item?.id;
+  const hotel = getHotel(item);
+  return hotel?.id ?? hotel?.hotelId ?? item?.hotelId ?? item?.id;
+}
+
+function getHotel(item) {
+  return (
+    item?.hotel ??
+    item?.hotelSummary ??
+    item?.hotelResponse ??
+    item?.savedHotel ??
+    item
+  );
 }
 
 function getHotelName(item) {
-  return item?.hotel?.name ?? item?.hotelName ?? item?.name ?? "Hotel";
+  const hotel = getHotel(item);
+  return (
+    hotel?.name ??
+    hotel?.hotelName ??
+    item?.hotelName ??
+    item?.name ??
+    "Hotel name needs backend verification"
+  );
 }
 
 function getHotelLocation(item) {
-  const hotel = item?.hotel ?? item;
+  const hotel = getHotel(item);
   return [hotel?.city, hotel?.countryCode ?? hotel?.country]
     .filter(Boolean)
     .join(", ");
 }
 
 function getHotelStars(item) {
-  return Number(item?.hotel?.starRating ?? item?.starRating ?? 0);
+  const hotel = getHotel(item);
+  return Number(hotel?.starRating ?? item?.starRating ?? 0);
 }
 
 function getHotelType(item) {
-  return item?.hotel?.type ?? item?.type ?? "";
+  const hotel = getHotel(item);
+  return hotel?.type ?? item?.type ?? "";
 }
 
 function getPhotoUrl(item) {
+  const hotel = getHotel(item);
   const photos =
-    item?.hotel?.photos ??
+    hotel?.photos ??
+    hotel?.hotelPhotos ??
     item?.photos ??
-    item?.hotel?.coverPhoto ??
     null;
-  if (Array.isArray(photos) && photos.length > 0) {
-    return photos[0]?.url ?? photos[0];
+
+  const directPhoto =
+    hotel?.coverPhotoUrl ??
+    hotel?.mainPhotoUrl ??
+    hotel?.photoUrl ??
+    hotel?.imageUrl ??
+    item?.coverPhotoUrl ??
+    item?.mainPhotoUrl ??
+    item?.photoUrl ??
+    item?.imageUrl ??
+    hotel?.coverPhoto?.url ??
+    hotel?.coverPhoto?.photoUrl ??
+    item?.coverPhoto?.url ??
+    item?.coverPhoto?.photoUrl;
+
+  if (directPhoto) {
+    return directPhoto;
   }
+
+  if (Array.isArray(photos) && photos.length > 0) {
+    const coverPhoto = photos.find((photo) => photo?.cover) ?? photos[0];
+    return coverPhoto?.url ?? coverPhoto?.photoUrl ?? coverPhoto?.imageUrl ?? coverPhoto;
+  }
+
   return null;
 }
 
